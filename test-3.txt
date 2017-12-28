@@ -1,5 +1,9 @@
+Line 0
 Line 1
 Line 2
 Line 3
 Line 4
+<<<<<<< HEAD
 Line 5
+=======
+>>>>>>> 2d463e60bd917e4a0fb2ff98961c6bab239ca0b4
