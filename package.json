@@ -2,11 +2,12 @@
   "name": "hello-world",
   "version": "0.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "src/server.js",
   "author": {
     "name": "Tyler Lu"
   },
   "dependencies": {
-    "documentdb": "^1.14.2"
+    "documentdb": "^1.14.2",
+    "npm": "^5.6.0"
   }
 }

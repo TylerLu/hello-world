@@ -27,7 +27,7 @@ docDbUtils.getOrCreateDatabase(docDbClient, config.databaseId, function(err, db)
 });
 
 // create server
-var port = process.env.PORT || 1338;
+var port = process.env.PORT || 80;
 http.createServer(function (req, res) {
     if(docDbError){
         res.writeHead(500, { 'Content-Type': 'text/plain' });
