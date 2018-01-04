@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: hello-world
-        image: jv4ygam5svaeq.azurecr.io/tyler/myfirstapp:7
+        image: jv4ygam5svaeq.azurecr.io/tyler/myfirstapp:$BUILD_NUMBER
         ports:
         - containerPort: 80
 ---
