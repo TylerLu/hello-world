@@ -1,5 +1,4 @@
 #!/bin/bash
-echo $@
 function print_usage() {
   cat <<EOF
 Installs Jenkins and exposes it to the public through port 80 (login and cli are disabled)
@@ -10,16 +9,8 @@ Arguments
   --vm_private_ip|-pi                 : The VM private ip used to configure Jenkins URL. If missing, jenkins_fqdn will be used instead
   --jenkins_release_type|-jrt         : The Jenkins release type (LTS or weekly or verified). By default it's set to LTS
   --jenkins_version_location|-jvl     : Url used to specify the version of Jenkins.
-  --service_principal_type|-sp        : The type of service principal: MSI or manual.
-  --service_principal_id|-sid         : The service principal ID.
-  --service_principal_secret|-ss      : The service principal secret.
-  --subscription_id|-subid            : The subscription ID of the SP.
-  --tenant_id|-tid                    : The tenant id of the SP.
   --artifacts_location|-al            : Url used to reference other scripts/artifacts.
   --sas_token|-st                     : A sas token needed if the artifacts location is private.
-  --cloud_agents|-ca                  : The type of the cloud agents: aci, vm or no.
-  --resource_group|-rg                : the resource group name.
-  --location|-lo                      : the resource group location.
 EOF
 }
 
@@ -42,20 +33,6 @@ function run_util_script() {
     >&2 echo "Failed while executing script '$script_path'."
     exit $return_value
   fi
-}
-
-function retry_until_successful {
-  counter=0
-  "${@}"
-  while [ $? -ne 0 ]; do
-    if [[ "$counter" -gt 20 ]]; then
-        exit 1
-    else
-        let counter++
-    fi
-    sleep 5
-    "${@}"
-  done;
 }
 
 #defaults
@@ -85,44 +62,12 @@ do
       jenkins_version_location="$1"
       shift
       ;;
-    --service_principal_type|-sp)
-      service_principal_type="$1"
-      shift
-      ;;
-    --service_principal_id|-spid)
-      service_principal_id="$1"
-      shift
-      ;;
-    --service_principal_secret|-ss)
-      service_principal_secret="$1"
-      shift
-      ;;
-    --subscription_id|-subid)
-      subscription_id="$1"
-      shift
-      ;;
-    --tenant_id|-tid)
-      tenant_id="$1"
-      shift
-      ;;
     --artifacts_location|-al)
       artifacts_location="$1"
       shift
       ;;
     --sas_token|-st)
       artifacts_location_sas_token="$1"
-      shift
-      ;;
-    --cloud_agents|-ca)
-      cloud_agents="$1"
-      shift
-      ;;
-    --resource_group|-rg)
-      resource_group="$1"
-      shift
-      ;;
-    --location|-lo)
-      location="$1"
       shift
       ;;
     --help|-help|-h)
@@ -208,8 +153,6 @@ jenkins_disable_reverse_proxy_warning=$(cat <<EOF
 EOF
 )
 
-jenkins_agent_port="<slaveAgentPort>5378</slaveAgentPort>"
-
 nginx_reverse_proxy_conf=$(cat <<EOF
 server {
     listen 80;
@@ -277,9 +220,6 @@ else
   sudo apt-get install jenkins --yes # sometime the first apt-get install jenkins command fails, so we try it twice
 fi
 
-retry_until_successful sudo test -f /var/lib/jenkins/secrets/initialAdminPassword
-retry_until_successful run_util_script "jenkins/run-cli-command.sh" -c "version"
-
 #We need to install workflow-aggregator so all the options in the auth matrix are valid
 plugins=(azure-vm-agents windows-azure-storage matrix-auth workflow-aggregator azure-app-service tfs azure-acs azure-container-agents)
 for plugin in "${plugins[@]}"; do
@@ -300,158 +240,8 @@ inter_jenkins_config=$(sed -zr -e"s|<disabledAdministrativeMonitors/>|{disable-r
 final_jenkins_config=${inter_jenkins_config//'{disable-reverse-proxy-token}'/${jenkins_disable_reverse_proxy_warning}}
 echo "${final_jenkins_config}" | sudo tee /var/lib/jenkins/config.xml > /dev/null
 
-#Open a fixed port for JNLP
-inter_jenkins_config=$(sed -zr -e"s|<slaveAgentPort.*</slaveAgentPort>|{slave-agent-port}|" /var/lib/jenkins/config.xml)
-final_jenkins_config=${inter_jenkins_config//'{slave-agent-port}'/${jenkins_agent_port}}
-echo "${final_jenkins_config}" | sudo tee /var/lib/jenkins/config.xml > /dev/null
-
 #restart jenkins
 sudo service jenkins restart
-
-#install the service principal
-msi_cred=$(cat <<EOF
-<com.microsoft.azure.util.AzureMsiCredentials>
-  <scope>GLOBAL</scope>
-  <id>azure_service_principal</id>
-  <description>Local MSI</description>
-  <msiPort>50342</msiPort>
-</com.microsoft.azure.util.AzureMsiCredentials>
-EOF
-)
-sp_cred=$(cat <<EOF
-<com.microsoft.azure.util.AzureCredentials>
-  <scope>GLOBAL</scope>
-  <id>azure_service_principal</id>
-  <description>Manual Service Principal</description>
-  <data>
-    <subscriptionId>${subscription_id}</subscriptionId>
-    <clientId>${service_principal_id}</clientId>
-    <clientSecret>${service_principal_secret}</clientSecret>
-    <oauth2TokenEndpoint>https://login.windows.net/${tenant_id}</oauth2TokenEndpoint>
-    <serviceManagementURL>https://management.core.windows.net/</serviceManagementURL>
-    <tenant>${tenant_id}</tenant>
-    <authenticationEndpoint>https://login.microsoftonline.com/</authenticationEndpoint>
-    <resourceManagerEndpoint>https://management.azure.com/</resourceManagerEndpoint>
-    <graphEndpoint>https://graph.windows.net/</graphEndpoint>
-  </data>
-</com.microsoft.azure.util.AzureCredentials>
-EOF
-)
-
-retry_until_successful run_util_script "jenkins/run-cli-command.sh" -c "version"
-
-if [ "${service_principal_type}" == 'msi' ]; then
-  echo "${msi_cred}" > msi_cred.xml
-  run_util_script "jenkins/run-cli-command.sh" -c "create-credentials-by-xml system::system::jenkins _" -cif msi_cred.xml
-  rm msi_cred.xml
-else
-  echo "${sp_cred}" > sp_cred.xml
-  run_util_script "jenkins/run-cli-command.sh" -c "create-credentials-by-xml system::system::jenkins _" -cif sp_cred.xml
-  rm sp_cred.xml
-fi
-
-#add cloud agents
-vm_agent_conf=conf=$(cat <<EOF
-<clouds>
-  <com.microsoft.azure.vmagent.AzureVMCloud>
-    <name>AzureVMAgents</name>
-    <cloudName>AzureVMAgents</cloudName>
-    <credentialsId>azure_service_principal</credentialsId>
-    <maxVirtualMachinesLimit>10</maxVirtualMachinesLimit>
-    <resourceGroupReferenceType>existing</resourceGroupReferenceType>
-    <existingResourceGroupName>${resource_group}</existingResourceGroupName>
-    <vmTemplates>
-      <com.microsoft.azure.vmagent.AzureVMAgentTemplate>
-        <templateName>win-agent</templateName>
-        <labels>win</labels>
-        <location>${location}</location>
-        <virtualMachineSize>Standard_D1_v2</virtualMachineSize>
-        <storageAccountNameReferenceType>new</storageAccountNameReferenceType>
-        <diskType>managed</diskType>
-        <storageAccountType>Standard_LRS</storageAccountType>
-        <noOfParallelJobs>1</noOfParallelJobs>
-        <usageMode>NORMAL</usageMode>
-        <shutdownOnIdle>false</shutdownOnIdle>
-        <imageTopLevelType>basic</imageTopLevelType>
-        <builtInImage>Windows Server 2016</builtInImage>
-        <credentialsId>agent_admin_account</credentialsId>
-        <retentionTimeInMin>60</retentionTimeInMin>
-      </com.microsoft.azure.vmagent.AzureVMAgentTemplate>
-      <com.microsoft.azure.vmagent.AzureVMAgentTemplate>
-        <templateName>linux-agent</templateName>
-        <labels>linux</labels>
-        <location>${location}</location>
-        <virtualMachineSize>Standard_D1_v2</virtualMachineSize>
-        <storageAccountNameReferenceType>new</storageAccountNameReferenceType>
-        <diskType>managed</diskType>
-        <storageAccountType>Standard_LRS</storageAccountType>
-        <noOfParallelJobs>1</noOfParallelJobs>
-        <usageMode>NORMAL</usageMode>
-        <shutdownOnIdle>false</shutdownOnIdle>
-        <imageTopLevelType>basic</imageTopLevelType>
-        <builtInImage>Ubuntu 16.04 LTS</builtInImage>
-        <credentialsId>agent_admin_account</credentialsId>
-        <retentionTimeInMin>60</retentionTimeInMin>
-      </com.microsoft.azure.vmagent.AzureVMAgentTemplate>
-    </vmTemplates>
-    <deploymentTimeout>1200</deploymentTimeout>
-    <approximateVirtualMachineCount>0</approximateVirtualMachineCount>
-  </com.microsoft.azure.vmagent.AzureVMCloud>
-</clouds>
-EOF
-)
-
-aci_agent_conf=$(cat <<EOF
-<clouds>
-  <com.microsoft.jenkins.containeragents.aci.AciCloud>
-    <name>AciAgents</name>
-    <credentialsId>azure_service_principal</credentialsId>
-    <resourceGroup>${resource_group}</resourceGroup>
-    <templates>
-      <com.microsoft.jenkins.containeragents.aci.AciContainerTemplate>
-        <name>aciagents</name>
-        <image>jenkinsci/jnlp-slave</image>
-        <osType>Linux</osType>
-        <command>jenkins-slave -url \${rootUrl} \${secret} \${nodeName}</command>
-        <rootFs>/home/jenkins</rootFs>
-        <timeout>10</timeout>
-        <cpu>1</cpu>
-        <memory>1.5</memory>
-        <retentionStrategy class="com.microsoft.jenkins.containeragents.strategy.ContainerOnceRetentionStrategy" />
-      </com.microsoft.jenkins.containeragents.aci.AciContainerTemplate>
-    </templates>
-  </com.microsoft.jenkins.containeragents.aci.AciCloud>
-</clouds>
-EOF
-)
-
-agent_admin_password=$(head /dev/urandom | tr -dc A-Z | head -c 4)$(head /dev/urandom | tr -dc a-z | head -c 4)$(head /dev/urandom | tr -dc 0-9 | head -c 4)'!@'
-agent_admin_cred=$(cat <<EOF
-<com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
-  <scope>GLOBAL</scope>
-  <id>agent_admin_account</id>
-  <description>the admin account for the vm agents</description>
-  <username>agentadmin</username>
-  <password>${agent_admin_password}</password>
-</com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
-EOF
-)
-
-if [ "${cloud_agents}" == 'vm' ]; then
-  echo "${agent_admin_cred}" > agent_admin_cred.xml
-  run_util_script "jenkins/run-cli-command.sh" -c "create-credentials-by-xml system::system::jenkins _" -cif agent_admin_cred.xml
-  rm agent_admin_cred.xml
-  inter_jenkins_config=$(sed -zr -e"s|<clouds/>|{clouds}|" /var/lib/jenkins/config.xml)
-  final_jenkins_config=${inter_jenkins_config//'{clouds}'/${vm_agent_conf}}
-  echo "${final_jenkins_config}" | sudo tee /var/lib/jenkins/config.xml > /dev/null
-elif [ "${cloud_agents}" == 'aci' ]; then
-  inter_jenkins_config=$(sed -zr -e"s|<clouds/>|{clouds}|" /var/lib/jenkins/config.xml)
-  final_jenkins_config=${inter_jenkins_config//'{clouds}'/${aci_agent_conf}}
-  echo "${final_jenkins_config}" | sudo tee /var/lib/jenkins/config.xml > /dev/null
-fi
-
-run_util_script "jenkins/run-cli-command.sh" -c "reload-configuration"
-
 
 #install nginx
 sudo apt-get install nginx --yes
