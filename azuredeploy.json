@@ -38,6 +38,13 @@
           "description": "URL to a public git repository that includes a Dockerfile."
         },
         "defaultValue": "https://github.com/azure-devops/spin-kub-demo.git"
+      },
+      "artifactsLocation": {
+        "type": "string",
+        "metadata": {
+          "description": "URL to a folder that includes artifacts."
+        },
+        "defaultValue": "https://raw.githubusercontent.com/TylerLu/hello-world/"
       }
     },
     "variables": {
@@ -53,8 +60,7 @@
       "vmExtensionName": "[concat(variables('resourcePrefix'), 'Init')]",
       "virtualNetworkName": "[concat(variables('resourcePrefix'), 'VNET')]",
       "frontEndNSGName": "[concat(variables('resourcePrefix'), 'NSG')]",
-      "_artifactsLocation": "https://raw.githubusercontent.com/Azure/azure-devops-utils/v0.27.0/",
-      "_extensionScript": "201-jenkins-acr.sh",
+      "_extensionScript": "jenkins-acr-aks.sh",
       "_artifactsLocationSasToken": ""
     },
     "resources": [
@@ -247,11 +253,11 @@
               "autoUpgradeMinorVersion": true,
               "settings": {
                 "fileUris": [
-                  "[concat(variables('_artifactsLocation'), 'quickstart_template/', variables('_extensionScript'), variables('_artifactsLocationSasToken'))]"
+                  "[concat(parameters('artifactsLocation'), variables('_extensionScript'), variables('_artifactsLocationSasToken'))]"
                 ]
               },
               "protectedSettings": {
-                "commandToExecute": "[concat('./' , variables('_extensionScript'),' -jf \"', reference(variables('publicIPAddressName')).dnsSettings.fqdn, '\" -u \"', parameters('adminUsername') , '\" -g \"', parameters('gitRepository') , '\" -r \"https://',reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))).loginServer, '\" -ru \"', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-03-01').username, '\" -rp \"', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-03-01').passwords[0].value], '\" -al \"', variables('_artifactsLocation'), '\" -st \"', variables('_artifactsLocationSasToken'), '\"' )]"
+                "commandToExecute": "[concat('./' , variables('_extensionScript'),' -jf \"', reference(variables('publicIPAddressName')).dnsSettings.fqdn, '\" -u \"', parameters('adminUsername') , '\" -g \"', parameters('gitRepository') , '\" -r \"https://',reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))).loginServer, '\" -ru \"', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-03-01').username, '\" -rp \"', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-03-01').passwords[0].value], '\" -al \"', variables('_artifactsLocation'), '\" -al \"', parameters('artifactsLocation'), '\"' ), '\" -st \"', variables('_artifactsLocationSasToken'), '\"' )]"
               }
             }
           }
