@@ -81,8 +81,7 @@
         "location": "[resourceGroup().location]",
         "apiVersion": "2017-10-01",
         "sku": {
-            "name": "Managed_Basic",
-            "tier": "Managed"
+            "name": "Basic"
         },
         "properties": {
           "adminUserEnabled": true
