@@ -253,7 +253,7 @@
               "autoUpgradeMinorVersion": true,
               "settings": {
                 "fileUris": [
-                  "[concat(parameters('artifactsLocation'), variables('_extensionScript'), variables('_artifactsLocationSasToken'))]"
+                  "[concat(parameters('artifactsLocation'), 'jenkins/', variables('_extensionScript'), variables('_artifactsLocationSasToken'))]"
                 ]
               },
               "protectedSettings": {
