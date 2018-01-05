@@ -5,15 +5,19 @@ https://github.com/Azure/azure-quickstart-templates/tree/master/201-jenkins-acr
 Command
   $0
 Arguments
-  --vm_user_name|-u        [Required] : VM user name
-  --git_url|-g             [Required] : Git URL with a Dockerfile in it's root
-  --registry|-r            [Required] : Registry url targeted by the pipeline
-  --registry_user_name|-ru [Required] : Registry user name
-  --registry_password|-rp  [Required] : Registry password
-  --repository|-rr         [Required] : Repository targeted by the pipeline
-  --jenkins_fqdn|-jf       [Required] : Jenkins FQDN
-  --artifacts_location|-al            : Url used to reference other scripts/artifacts.
-  --sas_token|-st                     : A sas token needed if the artifacts location is private.
+  --vm_user_name|-u               [Required] : VM user name
+  --git_url|-g                    [Required] : Git URL with a Dockerfile in it's root
+  --registry|-r                   [Required] : Registry url targeted by the pipeline
+  --registry_user_name|-ru        [Required] : Registry user name
+  --registry_password|-rp         [Required] : Registry password
+  --repository|-rr                [Required] : Repository targeted by the pipeline
+  --jenkins_fqdn|-jf              [Required] : Jenkins FQDN
+  --service_principal_id|-sid     [Required] : The service principal ID.
+  --service_principal_secret|-ss  [Required] : The service principal secret.
+  --subscription_id|-subid        [Required] : The subscription ID of the SP.
+  --tenant_id|-tid                [Required] : The tenant id of the SP.
+  --artifacts_location|-al                   : Url used to reference other scripts/artifacts.
+  --sas_token|-st                            : A sas token needed if the artifacts location is private.
 EOF
 }
 
@@ -73,6 +77,22 @@ do
       jenkins_fqdn="$1"
       shift
       ;;
+    --service_principal_id|-spid)
+      service_principal_id="$1"
+      shift
+      ;;
+    --service_principal_secret|-ss)
+      service_principal_secret="$1"
+      shift
+      ;;
+    --subscription_id|-subid)
+      subscription_id="$1"
+      shift
+      ;;
+    --tenant_id|-tid)
+      tenant_id="$1"
+      shift
+      ;;
     --artifacts_location|-al)
       artifacts_location="$1"
       shift
@@ -97,9 +117,13 @@ throw_if_empty --registry $registry
 throw_if_empty --registry_user_name $registry_user_name
 throw_if_empty --registry_password $registry_password
 throw_if_empty --jenkins_fqdn $jenkins_fqdn
+throw_if_empty --service_principal_id $service_principal_id
+throw_if_empty --service_principal_secret $service_principal_secret
+throw_if_empty --subscription_id $subscription_id
+throw_if_empty --tenant_id $tenant_id
 
 #install jenkins
-run_util_script "jenkins/install_jenkins.sh" -jf "${jenkins_fqdn}" -al "${artifacts_location}" -st "${artifacts_location_sas_token}"
+run_util_script "jenkins/install_jenkins.sh" -jf "${jenkins_fqdn}" -sid "${service_principal_id}" -ss "${service_principal_secret}" -subid "${subscription_id}" -tid "${tenant_id}" -al "${artifacts_location}" -st "${artifacts_location_sas_token}"
 
 #install git
 sudo apt-get install git --yes
