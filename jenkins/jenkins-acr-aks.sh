@@ -12,7 +12,7 @@ Arguments
   --registry_password|-rp         [Required] : Registry password
   --repository|-rr                [Required] : Repository targeted by the pipeline
   --jenkins_fqdn|-jf              [Required] : Jenkins FQDN
-  --service_principal_id|-sid     [Required] : The service principal ID.
+  --service_principal_id|-spid     [Required] : The service principal ID.
   --service_principal_secret|-ss  [Required] : The service principal secret.
   --subscription_id|-subid        [Required] : The subscription ID of the SP.
   --tenant_id|-tid                [Required] : The tenant id of the SP.
@@ -77,7 +77,7 @@ do
       jenkins_fqdn="$1"
       shift
       ;;
-    --service_principal_id|-sid)
+    --service_principal_id|-spid)
       service_principal_id="$1"
       shift
       ;;
@@ -123,7 +123,7 @@ throw_if_empty --subscription_id $subscription_id
 throw_if_empty --tenant_id $tenant_id
 
 #install jenkins
-run_util_script "jenkins/install_jenkins.sh" -jf "${jenkins_fqdn}" -sid "${service_principal_id}" -ss "${service_principal_secret}" -subid "${subscription_id}" -tid "${tenant_id}" -al "${artifacts_location}" -st "${artifacts_location_sas_token}"
+run_util_script "jenkins/install_jenkins.sh" -jf "${jenkins_fqdn}" -spid "${service_principal_id}" -ss "${service_principal_secret}" -subid "${subscription_id}" -tid "${tenant_id}" -al "${artifacts_location}" -st "${artifacts_location_sas_token}"
 
 #install git
 sudo apt-get install git --yes
