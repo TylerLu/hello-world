@@ -71,42 +71,16 @@
         "properties": {}
       },
       {
-        "type": "Microsoft.Storage/storageAccounts",
-        "name": "[variables('acrStorageAccountName')]",
-        "apiVersion": "2016-01-01",
-        "location": "[resourceGroup().location]",
-        "sku": {
-          "name": "Standard_LRS"
-        },
-        "kind": "Storage",
-        "properties": {
-          "encryption": {
-            "services": {
-              "blob": {
-                "enabled": true
-              }
-            },
-            "keySource": "Microsoft.Storage"
-          }
-        }
-      },
-      {
         "name": "[variables('acrName')]",
         "type": "Microsoft.ContainerRegistry/registries",
         "location": "[resourceGroup().location]",
         "apiVersion": "2017-03-01",
-        "dependsOn": [
-          "[resourceId('Microsoft.Storage/storageAccounts', variables('acrStorageAccountName'))]"
-        ],
         "sku": {
-          "name": "Basic"
+            "name": "Managed_Basic",
+            "tier": "Managed"
         },
         "properties": {
-          "adminUserEnabled": false,
-          "storageAccount": {
-            "name": "[variables('acrStorageAccountName')]",
-            "accessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('acrStorageAccountName')), '2016-01-01').keys[0].value]"
-          }
+          "adminUserEnabled": true
         }
       },
       {
