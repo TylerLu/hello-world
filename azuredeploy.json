@@ -79,7 +79,7 @@
         "name": "[variables('acrName')]",
         "type": "Microsoft.ContainerRegistry/registries",
         "location": "[resourceGroup().location]",
-        "apiVersion": "2017-03-01",
+        "apiVersion": "2017-10-01",
         "sku": {
             "name": "Managed_Basic",
             "tier": "Managed"
