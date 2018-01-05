@@ -143,7 +143,7 @@ if [ -z "$repository" ]; then
 fi
 
 job_short_name="hello-world"
-job_display_name="Hello World Build & Deploy"
+job_display_name="Hello World Build &amp; Deploy"
 job_description="A pipeline that builds a Docker image, pushed built image to ACR, and deploy configurations to AKS."
 
 echo "Including the pipeline"
