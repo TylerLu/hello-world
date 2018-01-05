@@ -49,13 +49,13 @@ function run_util_script() {
 #set defaults
 credentials_id="docker_credentials"
 credentials_desc="Docker Container Registry Credentials"
-job_short_name="basic-docker-build"
-job_display_name="Basic Docker Build"
-job_description="A basic pipeline that builds a Docker container. The job expects a Dockerfile at the root of the git repository"
-repository="${USER}/myfirstapp"
+job_short_name="hello-world"
+job_display_name="Hello World Build and Deploy"
+job_description="A pipeline that builds a Docker image, pushed built image to ACR, and deploy configurations to AKS."
+repository="hello-world"
 scm_poll_schedule=""
 scm_poll_ignore_commit_hooks="0"
-    ="https://raw.githubusercontent.com/Azure/azure-devops-utils/master/"
+artifacts_location="https://raw.githubusercontent.com/Azure/azure-devops-utils/master/"
 
 while [[ $# > 0 ]]
 do
