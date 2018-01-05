@@ -98,10 +98,6 @@ throw_if_empty --registry_user_name $registry_user_name
 throw_if_empty --registry_password $registry_password
 throw_if_empty --jenkins_fqdn $jenkins_fqdn
 
-if [ -z "$repository" ]; then
-  repository="${vm_user_name}/myfirstapp"
-fi
-
 #install jenkins
 run_util_script "jenkins/install_jenkins.sh" -jf "${jenkins_fqdn}" -al "${artifacts_location}" -st "${artifacts_location_sas_token}"
 
@@ -118,5 +114,13 @@ sudo gpasswd -a jenkins docker
 skill -KILL -u jenkins
 sudo service jenkins restart
 
+if [ -z "$repository" ]; then
+  repository="hello-world"
+fi
+
+job_short_name="hello-world"
+job_display_name="Hello World Build and Deploy"
+job_description="A pipeline that builds a Docker image, pushed built image to ACR, and deploy configurations to AKS."
+
 echo "Including the pipeline"
-run_util_script "jenkins/add-docker-build-job.sh" -j "http://localhost:8080/" -ju "admin" -g "${git_url}" -r "${registry}" -ru "${registry_user_name}"  -rp "${registry_password}" -rr "$repository" -sps "* * * * *" -al "$artifacts_location" -st "$artifacts_location_sas_token"
+run_util_script "jenkins/add-docker-build-job.sh" -j "http://localhost:8080/" -ju "admin" -jsn "${job_short_name}" -jdn "${job_display_name}" -jd "${job_description}" -g "${git_url}" -r "${registry}" -ru "${registry_user_name}" -rp "${registry_password}" -rr "$repository" -sps "* * * * *" -al "$artifacts_location" -st "$artifacts_location_sas_token"
