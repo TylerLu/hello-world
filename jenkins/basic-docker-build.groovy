@@ -1,5 +1,6 @@
 node {
     def built_img = ''
+    def taggedImageName = ''
     stage('Checkout git repo') {
       git branch: 'master', url: params.git_repo
     }
@@ -8,7 +9,11 @@ node {
     }
     stage('Push Docker image to Azure Container Registry') {
       docker.withRegistry(params.registry_url, params.registry_credentials_id ) {
+        taggedImageName = built_img.tag("${env.BUILD_NUMBER}")
         built_img.push("${env.BUILD_NUMBER}");
       }
+    }
+    stage('Deploy configurations to Azure Container Service (AKS)') {
+      acsDeploy azureCredentialsId: 'azure_service_principal', configFilePaths: 'kubernetes/*.yaml', containerService: 'tyler | AKS', dcosDockerCredentialsPath: '', enableConfigSubstitution: true, resourceGroupName: 'MSAzure-TylerAKS', secretName: '', sshCredentialsId: ''
     }
 }
