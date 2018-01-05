@@ -193,7 +193,7 @@ echo "${job_xml}" > job.xml
 
 #install the required plugins
 run_util_script "jenkins/run-cli-command.sh" -j "$jenkins_url" -ju "$jenkins_username" -jp "$jenkins_password" -c "install-plugin credentials -deploy"
-plugins=(docker-workflow) #git
+plugins=(docker-workflow git)
 for plugin in "${plugins[@]}"; do
   run_util_script "jenkins/run-cli-command.sh" -j "$jenkins_url" -ju "$jenkins_username" -jp "$jenkins_password" -c "install-plugin $plugin -restart"
 done
