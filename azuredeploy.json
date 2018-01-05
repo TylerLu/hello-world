@@ -43,7 +43,6 @@
     "variables": {
       "resourcePrefix": "jenkins",
       "storageAccountName": "[concat(variables('resourcePrefix'), uniquestring(resourceGroup().id))]",
-      "acrStorageAccountName": "[concat('registry', uniqueString(resourceGroup().id))]",
       "acrName": "[uniqueString(resourceGroup().id)]",
       "OSDiskName": "[concat(variables('resourcePrefix'), 'OSDisk')]",
       "nicName": "[concat(variables('resourcePrefix'), 'VMNic')]",
