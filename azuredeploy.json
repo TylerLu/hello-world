@@ -257,7 +257,7 @@
                 ]
               },
               "protectedSettings": {
-                "commandToExecute": "[concat('./' , variables('_extensionScript'),' -jf \"', reference(variables('publicIPAddressName')).dnsSettings.fqdn, '\" -u \"', parameters('adminUsername') , '\" -g \"', parameters('gitRepository') , '\" -r \"https://',reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))).loginServer, '\" -ru \"', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-03-01').username, '\" -rp \"', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-03-01').passwords[0].value], '\" -al \"', variables('_artifactsLocation'), '\" -al \"', parameters('artifactsLocation'), '\" -st \"', variables('_artifactsLocationSasToken'), '\"' )]"
+                "commandToExecute": "[concat('./' , variables('_extensionScript'),' -jf \"', reference(variables('publicIPAddressName')).dnsSettings.fqdn, '\" -u \"', parameters('adminUsername') , '\" -g \"', parameters('gitRepository') , '\" -r \"https://',reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))).loginServer, '\" -ru \"', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-03-01').username, '\" -rp \"', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-03-01').passwords[0].value, '\" -al \"', variables('_artifactsLocation'), '\" -al \"', parameters('artifactsLocation'), '\" -st \"', variables('_artifactsLocationSasToken'), '\"' )]"
               }
             }
           }
