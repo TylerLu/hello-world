@@ -77,7 +77,7 @@ do
       jenkins_fqdn="$1"
       shift
       ;;
-    --service_principal_id|-spid)
+    --service_principal_id|-sid)
       service_principal_id="$1"
       shift
       ;;
