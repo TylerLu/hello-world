@@ -45,7 +45,7 @@
         "metadata": {
           "description": "URL to a folder that includes artifacts."
         },
-        "defaultValue": "https://raw.githubusercontent.com/TylerLu/hello-world/"
+        "defaultValue": "https://raw.githubusercontent.com/TylerLu/hello-world/master/"
       }
     },
     "variables": {
