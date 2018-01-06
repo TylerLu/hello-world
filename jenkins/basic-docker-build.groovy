@@ -14,6 +14,6 @@ node {
       }
     }
     stage('Deploy configurations to Azure Container Service (AKS)') {
-      acsDeploy azureCredentialsId: 'azure_service_principal', configFilePaths: 'kubernetes/*.yaml', containerService: 'tyler | AKS', dcosDockerCredentialsPath: '', enableConfigSubstitution: true, resourceGroupName: 'MSAzure-TylerAKS', secretName: '', sshCredentialsId: ''
+      acsDeploy azureCredentialsId: params.azure_service_principal_id, configFilePaths: 'kubernetes/*.yaml', containerService: params.aks_cluster_name + ' | AKS', dcosDockerCredentialsPath: '', enableConfigSubstitution: true, resourceGroupName: params.aks_resource_group_name, secretName: '', sshCredentialsId: ''
     }
 }
