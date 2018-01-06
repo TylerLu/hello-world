@@ -26,7 +26,7 @@ NB! The repository must contain a Dockerfile in the root</description>
         <hudson.model.StringParameterDefinition>
           <name>aks_resource_group_name</name>
           <description>Azure Container Service (AKS) Resource Group Name</description>
-          <defaultValue>MSAzure-TylerAKS</defaultValue>
+          <defaultValue>MSAzure-Tyler-AKS</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>aks_cluster_name</name>
