@@ -156,7 +156,6 @@
     },
     "variables": {
       "resourcePrefix": "jenkins",
-      "storageAccountName": "[concat(variables('resourcePrefix'), uniquestring(resourceGroup().id))]",
       "acrName": "[uniqueString(resourceGroup().id)]",
       "jenkinsOSDiskName": "[concat(variables('resourcePrefix'), 'OSDisk')]",
       "jenkinsNicName": "[concat(variables('resourcePrefix'), 'VMNic')]",
@@ -171,17 +170,6 @@
       "_artifactsLocationSasToken": ""
     },
     "resources": [
-      {
-        "type": "Microsoft.Storage/storageAccounts",
-        "name": "[variables('storageAccountName')]",
-        "apiVersion": "2016-01-01",
-        "location": "[resourceGroup().location]",
-        "sku": {
-          "name": "Standard_LRS"
-        },
-        "kind": "Storage",
-        "properties": {}
-      },
       {
         "name": "[variables('acrName')]",
         "type": "Microsoft.ContainerRegistry/registries",
@@ -301,12 +289,11 @@
         }
       },
       {
-        "apiVersion": "2016-03-30",
+        "apiVersion": "2016-04-30-preview",
         "type": "Microsoft.Compute/virtualMachines",
         "name": "[variables('jenkinsVmNameme')]",
         "location": "[resourceGroup().location]",
         "dependsOn": [
-          "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
           "[resourceId('Microsoft.Network/networkInterfaces', variables('jenkinsNicName'))]",
           "[resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))]"
         ],
@@ -327,12 +314,10 @@
               "version": "latest"
             },
             "osDisk": {
-              "name": "osdisk",
-              "vhd": {
-                "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2016-01-01').primaryEndpoints.blob, variables('jenkinsVmStorageAccountContainerName'), '/', variables('jenkinsOSDiskName'), '.vhd')]"
-              },
-              "caching": "ReadWrite",
-              "createOption": "FromImage"
+              "createOption": "fromImage",
+              "managedDisk": {
+                  "storageAccountType": "Premium_LRS"
+              }
             }
           },
           "networkProfile": {
