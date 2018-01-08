@@ -2,19 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-      "adminUsername": {
-        "type": "string",
-        "metadata": {
-          "description": "User name for the Linux Virtual Machines (Jenkins and Kubernetes)."
-        },
-        "defaultValue": "azureuser"
-      },
-      "adminPassword": {
-        "type": "securestring",
-        "metadata": {
-          "description": "Password for the Linux Virtual Machines (Jenkins and Kubernetes)."
-        }
-      },
       "servicePrincipalClientId": {
         "type": "string",
         "metadata": {
@@ -27,22 +14,41 @@
           "description": "Service Principal Client Secret used by Jenkins and Azure Container Service(AKS)."
         }
       },
+      "adminUsername": {
+        "type": "string",
+        "metadata": {
+          "description": "User name for the Linux Virtual Machines (Jenkins and Kubernetes)."
+        },
+        "defaultValue": "azureuser"
+      },
+      "jenkinsAdminPassword": {
+        "type": "securestring",
+        "metadata": {
+          "description": "Password for the Jenkins Virtual Machines."
+        }
+      },
       "jenkinsDnsPrefix": {
         "type": "string",
         "metadata": {
           "description": "Unique DNS Name for the Public IP used to access the Jenkins Virtual Machine."
         }
       },
-      "kubernetesClusterName": {
+      "kubernetesSshRSAPublicKey": {
         "type": "string",
         "metadata": {
-          "description": "The name of the Managed Cluster resource."
+          "description": "Configure all linux machines with the SSH RSA public key string. Your key should include three parts, for example 'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm'"
         }
       },
       "kubernetesDnsPrefix": {
         "type": "string",
         "metadata": {
           "description": "Optional DNS prefix to use with hosted Kubernetes API server FQDN."
+        }
+      },
+      "kubernetesClusterName": {
+        "type": "string",
+        "metadata": {
+          "description": "The name of the Managed Cluster resource."
         }
       },
       "kubernetesAgentCount": {
@@ -154,18 +160,13 @@
       "acrName": "[uniqueString(resourceGroup().id)]",
       "jenkinsOSDiskName": "[concat(variables('resourcePrefix'), 'OSDisk')]",
       "jenkinsNicName": "[concat(variables('resourcePrefix'), 'VMNic')]",
-      "subnetName": "[concat(variables('resourcePrefix'), 'Subnet')]",
-      "publicIPAddressName": "[concat(variables('resourcePrefix'), 'PublicIP')]",
+      "jenkinsSubnetName": "[concat(variables('resourcePrefix'), 'Subnet')]",
+      "jenkinsPublicIPAddressName": "[concat(variables('resourcePrefix'), 'PublicIP')]",
       "jenkinsVmStorageAccountContainerName": "vhds",
       "jenkinsVmNameme": "[concat(variables('resourcePrefix'), 'VM')]",
       "jenkinsVmExtensionName": "[concat(variables('resourcePrefix'), 'Init')]",
       "jenkinsVirtualNetworkName": "[concat(variables('resourcePrefix'), 'VNET')]",
       "jenkinsFrontEndNSGName": "[concat(variables('resourcePrefix'), 'NSG')]",
-      "kubernetesClusterName": "[parameters('kubernetesClusterName')]",
-      "kubernetesDnsPrefix": "[parameters('kubernetesDnsPrefix')]",
-      "kubernetesAgentCount": "[parameters('kubernetesAgentCount')]",
-      "kubernetesAgentVMSize": "[parameters('kubernetesAgentVMSize')]",
-      "kubernetesVersion": "[parameters('kubernetesVersion')]",
       "_extensionScript": "jenkins-acr-aks.sh",
       "_artifactsLocationSasToken": ""
     },
@@ -196,7 +197,7 @@
       {
         "apiVersion": "2016-09-01",
         "type": "Microsoft.Network/publicIPAddresses",
-        "name": "[variables('publicIPAddressName')]",
+        "name": "[variables('jenkinsPublicIPAddressName')]",
         "location": "[resourceGroup().location]",
         "properties": {
           "publicIPAllocationMethod": "Dynamic",
@@ -259,7 +260,7 @@
           },
           "subnets": [
             {
-              "name": "[variables('subnetName')]",
+              "name": "[variables('jenkinsSubnetName')]",
               "properties": {
                 "addressPrefix": "10.0.0.0/24",
                 "networkSecurityGroup": {
@@ -279,7 +280,7 @@
         "name": "[variables('jenkinsNicName')]",
         "location": "[resourceGroup().location]",
         "dependsOn": [
-          "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
+          "[resourceId('Microsoft.Network/publicIPAddresses', variables('jenkinsPublicIPAddressName'))]",
           "[resourceId('Microsoft.Network/virtualNetworks', variables('jenkinsVirtualNetworkName'))]"
         ],
         "properties": {
@@ -289,10 +290,10 @@
               "properties": {
                 "privateIPAllocationMethod": "Dynamic",
                 "publicIPAddress": {
-                  "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+                  "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('jenkinsPublicIPAddressName'))]"
                 },
                 "subnet": {
-                  "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', variables('jenkinsVirtualNetworkName')),'/subnets/',variables('subnetName'))]"
+                  "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', variables('jenkinsVirtualNetworkName')),'/subnets/',variables('jenkinsSubnetName'))]"
                 }
               }
             }
@@ -316,7 +317,7 @@
           "osProfile": {
             "computerName": "[variables('jenkinsVmNameme')]",
             "adminUsername": "[parameters('adminUsername')]",
-            "adminPassword": "[parameters('adminPassword')]"
+            "adminPassword": "[parameters('jenkinsAdminPassword')]"
           },
           "storageProfile": {
             "imageReference": {
@@ -362,7 +363,7 @@
                 ]
               },
               "protectedSettings": {
-                "commandToExecute": "[concat('./' , variables('_extensionScript'),' -jf \"', reference(variables('publicIPAddressName')).dnsSettings.fqdn, '\" -u \"', parameters('adminUsername') , '\" -g \"', parameters('gitRepository') , '\" -r \"https://',reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))).loginServer, '\" -ru \"', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-10-01').username, '\" -rp \"', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-10-01').passwords[0].value, '\" -subid \"', subscription().subscriptionId, '\" -tid \"', subscription().tenantId, '\" -spid \"', parameters('servicePrincipalClientId'), '\" -ss \"', parameters('servicePrincipalClientSecret'), '\" -al \"', parameters('jenkinsArtifactsLocation'), '\" -st \"', variables('_artifactsLocationSasToken'), '\"' )]"
+                "commandToExecute": "[concat('./' , variables('_extensionScript'),' -jf \"', reference(variables('jenkinsPublicIPAddressName')).dnsSettings.fqdn, '\" -u \"', parameters('adminUsername') , '\" -g \"', parameters('gitRepository') , '\" -r \"https://',reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))).loginServer, '\" -ru \"', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-10-01').username, '\" -rp \"', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-10-01').passwords[0].value, '\" -subid \"', subscription().subscriptionId, '\" -tid \"', subscription().tenantId, '\" -spid \"', parameters('servicePrincipalClientId'), '\" -ss \"', parameters('servicePrincipalClientSecret'), '\" -al \"', parameters('jenkinsArtifactsLocation'), '\" -st \"', variables('_artifactsLocationSasToken'), '\"' )]"
               }
             }
           }
@@ -372,23 +373,29 @@
         "apiVersion": "2017-08-31",
         "type": "Microsoft.ContainerService/managedClusters",
         "location": "[resourceGroup().location]",
-        "name": "[variables('kubernetesClusterName')]",
+        "name": "[parameters('kubernetesClusterName')]",
         "properties": {
-          "kubernetesVersion": "[variables('kubernetesVersion')]",
-           "dnsPrefix": "[variables('aksDnsPrefix')]",
+          "kubernetesVersion": "[parameters('kubernetesVersion')]",
+           "dnsPrefix": "[parameters('kubernetesDnsPrefix')]",
            "agentPoolProfiles": [
               {
                 "name": "agentpool",
-                "osDiskSizeGB": "0",
-                "count": "[variables('kubernetesAgentCount')]",
-                "vmSize": "[variables('kubernetesAgentVMSize')]",
+                "osDiskSizeGB": 0,
+                "count": "[parameters('kubernetesAgentCount')]",
+                "vmSize": "[parameters('kubernetesAgentVMSize')]",
                 "osType": "Linux",
                 "storageProfile": "ManagedDisks"
               }
             ],
             "linuxProfile": {
               "adminUsername": "[parameters('adminUsername')]",
-              "adminPassword": "[parameters('adminPassword')]"
+              "ssh": {
+                "publicKeys": [
+                  {
+                    "keyData": "[parameters('kubernetesSshRSAPublicKey')]"
+                  }
+                ]
+            }
             },
             "servicePrincipalProfile": {
                 "ClientId": "[parameters('servicePrincipalClientId')]",
@@ -400,11 +407,11 @@
     "outputs": {
       "jenkinsURL": {
         "type": "string",
-        "value": "[concat('http://', reference(variables('publicIPAddressName')).dnsSettings.fqdn)]"
+        "value": "[concat('http://', reference(variables('jenkinsPublicIPAddressName')).dnsSettings.fqdn)]"
       },
       "jenkinsSSH": {
         "type": "string",
-        "value": "[concat('ssh -L 8080:localhost:8080 ', parameters('adminUsername'), '@', reference(variables('publicIPAddressName')).dnsSettings.fqdn)]"
+        "value": "[concat('ssh -L 8080:localhost:8080 ', parameters('adminUsername'), '@', reference(variables('jenkinsPublicIPAddressName')).dnsSettings.fqdn)]"
       },
       "azureContainerRegistryUrl": {
         "type": "string",
@@ -412,7 +419,7 @@
       },
       "kubernetesControlPlaneFQDN": {
         "type": "string",
-        "value": "[reference(concat('Microsoft.ContainerService/managedClusters/', variables('kubernetesClusterName'))).fqdn]"
+        "value": "[reference(concat('Microsoft.ContainerService/managedClusters/', parameters('kubernetesClusterName'))).fqdn]"
       }
     }
   }
