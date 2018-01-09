@@ -177,10 +177,10 @@ job_xml=${job_xml//'{insert-job-display-name}'/${job_display_name}}
 job_xml=${job_xml//'{insert-job-description}'/${job_description}}
 job_xml=${job_xml//'{insert-git-url}'/${git_url}}
 job_xml=${job_xml//'{insert-registry}'/${registry}}
+job_xml=${job_xml//'{insert-aks-resource-group-name}'/${aks_resource_group_name}}
+job_xml=${job_xml//'{insert-aks-cluster-name}'/${aks_cluster_name}}}
 job_xml=${job_xml//'{insert-docker-credentials}'/${credentials_id}}
 job_xml=${job_xml//'{insert-container-repository}'/${repository}}
-#job_xml=${job_xml//'{insert-aks-resource-group-name}'/${aks_resource_group_name}}
-#job_xml=${job_xml//'{insert-aks-cluster-name}'/${aks_cluster_name}}}
 
 if [ -n "${scm_poll_schedule}" ]
 then

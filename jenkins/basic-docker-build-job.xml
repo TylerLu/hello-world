@@ -26,12 +26,12 @@ NB! The repository must contain a Dockerfile in the root</description>
         <hudson.model.StringParameterDefinition>
           <name>aks_resource_group_name</name>
           <description>Azure Container Service (AKS) Resource Group Name</description>
-          <defaultValue>MSAzure-Tyler-AKS</defaultValue>
+          <defaultValue>{insert-aks-resource-group-name}</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>aks_cluster_name</name>
           <description>Azure Container Service (AKS) Cluster Name</description>
-          <defaultValue>tyler</defaultValue>
+          <defaultValue>{insert-aks-cluster-name}</defaultValue>
         </hudson.model.StringParameterDefinition>
         <com.cloudbees.plugins.credentials.CredentialsParameterDefinition plugin="credentials@2.1.12">
           <name>registry_credentials_id</name>
