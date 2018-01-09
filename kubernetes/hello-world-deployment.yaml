@@ -11,6 +11,6 @@ spec:
     spec:
       containers:
       - name: hello-world
-        image: rfnv6xbz37xgo.azurecr.io/hello-world:1
+        image: cazbyscprcnca.azurecr.io/hello-world:1
         ports:
         - containerPort: 80
