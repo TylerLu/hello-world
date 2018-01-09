@@ -11,8 +11,10 @@ Arguments
   --registry_user_name|-ru        [Required] : Registry user name
   --registry_password|-rp         [Required] : Registry password
   --repository|-rr                [Required] : Repository targeted by the pipeline
+  --resource_group_name|-gn       [Required] : Name of the resource group which contains the AKS
+  --cluster_name|-cn              [Required] : Name of the AKS cluster
   --jenkins_fqdn|-jf              [Required] : Jenkins FQDN
-  --service_principal_id|-spid     [Required] : The service principal ID.
+  --service_principal_id|-spid    [Required] : The service principal ID.
   --service_principal_secret|-ss  [Required] : The service principal secret.
   --subscription_id|-subid        [Required] : The subscription ID of the SP.
   --tenant_id|-tid                [Required] : The tenant id of the SP.
@@ -73,6 +75,14 @@ do
       repository="$1"
       shift
       ;;
+    --resource_group_name|-gn)
+      resource_group_name="$1"
+      shift
+      ;;
+    --cluster_name|-cn)
+      cluster_name="$1"
+      shift
+      ;;
     --jenkins_fqdn|-jf)
       jenkins_fqdn="$1"
       shift
@@ -121,6 +131,8 @@ throw_if_empty --service_principal_id $service_principal_id
 throw_if_empty --service_principal_secret $service_principal_secret
 throw_if_empty --subscription_id $subscription_id
 throw_if_empty --tenant_id $tenant_id
+throw_if_empty --resource_group_name $resource_group_name
+throw_if_empty --cluster_name $cluster_name
 
 #install jenkins
 run_util_script "jenkins/install_jenkins.sh" -jf "${jenkins_fqdn}" -spid "${service_principal_id}" -ss "${service_principal_secret}" -subid "${subscription_id}" -tid "${tenant_id}" -al "${artifacts_location}" -st "${artifacts_location_sas_token}"
@@ -147,4 +159,4 @@ job_display_name="Hello World Build &amp; Deploy"
 job_description="A pipeline that builds a Docker image, pushed built image to ACR, and deploy configurations to AKS."
 
 echo "Including the pipeline"
-run_util_script "jenkins/add-docker-build-job.sh" -j "http://localhost:8080/" -ju "admin" -jsn "${job_short_name}" -jdn "${job_display_name}" -jd "${job_description}" -g "${git_url}" -r "${registry}" -ru "${registry_user_name}" -rp "${registry_password}" -rr "$repository" -sps "* * * * *" -al "$artifacts_location" -st "$artifacts_location_sas_token"
+run_util_script "jenkins/add-docker-build-job.sh" -j "http://localhost:8080/" -ju "admin" -jsn "${job_short_name}" -jdn "${job_display_name}" -jd "${job_description}" -g "${git_url}" -r "${registry}" -ru "${registry_user_name}" -rp "${registry_password}" -rr "$repository" -agn "${resource_group_name}" -acn "${cluster_name}" -sps "* * * * *" -al "$artifacts_location" -st "$artifacts_location_sas_token"

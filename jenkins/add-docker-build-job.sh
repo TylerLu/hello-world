@@ -5,23 +5,25 @@ function print_usage() {
 Command
   $0
 Arguments
-  --jenkins_url|-j          [Required]: Jenkins URL
-  --jenkins_username|-ju    [Required]: Jenkins user name
-  --jenkins_password|-jp              : Jenkins password. If not specified and the user name is "admin", the initialAdminPassword will be used
-  --git_url|-g              [Required]: Git URL with a Dockerfile in it's root
-  --registry|-r             [Required]: Registry url targeted by the pipeline
-  --registry_user_name|-ru  [Required]: Registry user name
-  --registry_password|-rp   [Required]: Registry password
-  --repository|-rr                    : Repository targeted by the pipeline
-  --credentials_id|-ci                : Desired Jenkins credentials id
-  --credentials_desc|-cd              : Desired Jenkins credentials description
-  --job_short_name|-jsn               : Desired Jenkins job short name
-  --job_display_name|-jdn             : Desired Jenkins job display name
-  --job_description|-jd               : Desired Jenkins job description
-  --scm_poll_schedule|-sps            : cron style schedule for SCM polling
-  --scm_poll_ignore_commit_hooks|spi  : Ignore changes notified by SCM post-commit hooks. (Will be ignore if the poll schedule is not defined)
-  --artifacts_location|-al            : Url used to reference other scripts/artifacts.
-  --sas_token|-st                     : A sas token needed if the artifacts location is private.
+  --jenkins_url|-j                [Required]: Jenkins URL
+  --jenkins_username|-ju          [Required]: Jenkins user name
+  --jenkins_password|-jp                    : Jenkins password. If not specified and the user name is "admin", the initialAdminPassword will be used
+  --git_url|-g                    [Required]: Git URL with a Dockerfile in it's root
+  --registry|-r                   [Required]: Registry url targeted by the pipeline
+  --registry_user_name|-ru        [Required]: Registry user name
+  --registry_password|-rp         [Required]: Registry password
+  --repository|-rr                          : Repository targeted by the pipeline
+  --aks_resource_group_name|-agn  [Required]: Name of the resource group which contains the AKS
+  --aks_cluster_name|-acn         [Required]: Name of the AKS cluster
+  --credentials_id|-ci                      : Desired Jenkins credentials id
+  --credentials_desc|-cd                    : Desired Jenkins credentials description
+  --job_short_name|-jsn                     : Desired Jenkins job short name
+  --job_display_name|-jdn                   : Desired Jenkins job display name
+  --job_description|-jd                     : Desired Jenkins job description
+  --scm_poll_schedule|-sps                  : cron style schedule for SCM polling
+  --scm_poll_ignore_commit_hooks|spi        : Ignore changes notified by SCM post-commit hooks. (Will be ignore if the poll schedule is not defined)
+  --artifacts_location|-al                  : Url used to reference other scripts/artifacts.
+  --sas_token|-st                           : A sas token needed if the artifacts location is private.
 EOF
 }
 
@@ -94,6 +96,14 @@ do
       repository="$1"
       shift
       ;;
+    --aks_resource_group_name|-agn)
+      aks_resource_group_name="$1"
+      shift
+      ;;
+    --aks_cluster_name|-acn)
+      aks_cluster_name="$1"
+      shift
+      ;;
     --credentials_id|-ci)
       credentials_id="$1"
       shift
@@ -149,6 +159,8 @@ throw_if_empty --git_url $git_url
 throw_if_empty --registry $registry
 throw_if_empty --registry_user_name $registry_user_name
 throw_if_empty --registry_password $registry_password
+throw_if_empty --aks_resource_group_name $aks_resource_group_name
+throw_if_empty --aks_cluster_name $aks_cluster_name
 
 #download dependencies
 job_xml=$(curl -s ${artifacts_location}/jenkins/basic-docker-build-job.xml${artifacts_location_sas_token})
@@ -167,7 +179,8 @@ job_xml=${job_xml//'{insert-git-url}'/${git_url}}
 job_xml=${job_xml//'{insert-registry}'/${registry}}
 job_xml=${job_xml//'{insert-docker-credentials}'/${credentials_id}}
 job_xml=${job_xml//'{insert-container-repository}'/${repository}}
-
+job_xml=${job_xml//'{insert-aks-resource-group-name}'/${aks_resource_group_name}
+job_xml=${job_xml//'{insert-aks-cluster-name}'/${aks_cluster_name}}
 
 if [ -n "${scm_poll_schedule}" ]
 then
