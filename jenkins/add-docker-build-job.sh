@@ -214,6 +214,10 @@ done
 #wait for instance to be back online
 run_util_script "jenkins/run-cli-command.sh" -j "$jenkins_url" -ju "$jenkins_username" -jp "$jenkins_password" -c "version"
 
+#show content of files
+cat credentials.xml
+cat job.xml
+
 #add user/pwd
 echo "${credentials_xml}" > credentials.xml
 run_util_script "jenkins/run-cli-command.sh" -j "$jenkins_url" -ju "$jenkins_username" -jp "$jenkins_password" -c 'create-credentials-by-xml SystemCredentialsProvider::SystemContextResolver::jenkins (global)' -cif "credentials.xml"
