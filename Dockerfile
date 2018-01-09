@@ -17,4 +17,4 @@ EXPOSE 80
 # ENV NAME World
 
 # Run ng serve when the container launches
-CMD ["node", "./src/server.js"]
+CMD ["node", "server.js"]
