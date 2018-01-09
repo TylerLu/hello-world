@@ -177,7 +177,7 @@ job_xml=${job_xml//'{insert-job-display-name}'/${job_display_name}}
 job_xml=${job_xml//'{insert-job-description}'/${job_description}}
 job_xml=${job_xml//'{insert-git-url}'/${git_url}}
 job_xml=${job_xml//'{insert-registry}'/${registry}}
-job_xml=${job_xml//'{insert-aks-resource-group-name}'/${aks_resource_group_name}}
+#job_xml=${job_xml//'{insert-aks-resource-group-name}'/${aks_resource_group_name}}
 job_xml=${job_xml//'{insert-aks-cluster-name}'/${aks_cluster_name}}}
 job_xml=${job_xml//'{insert-docker-credentials}'/${credentials_id}}
 job_xml=${job_xml//'{insert-container-repository}'/${repository}}
@@ -219,7 +219,9 @@ echo "${credentials_xml}" > credentials.xml
 #add user/pwd
 run_util_script "jenkins/run-cli-command.sh" -j "$jenkins_url" -ju "$jenkins_username" -jp "$jenkins_password" -c 'create-credentials-by-xml SystemCredentialsProvider::SystemContextResolver::jenkins (global)' -cif "credentials.xml"
 
-echo job_short_name
+echo '--------------------------------'
+echo ${aks_resource_group_name}
+echo ${aks_cluster_name}
 
 #add job
 run_util_script "jenkins/run-cli-command.sh" -j "$jenkins_url" -ju "$jenkins_username" -jp "$jenkins_password" -c "create-job ${job_short_name}" -cif "job.xml"
