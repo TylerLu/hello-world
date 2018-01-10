@@ -47,12 +47,12 @@ NB! The repository must contain a Dockerfile in the root</description>
           <credentialType>com.microsoft.azure.util.AzureCredentials</credentialType>
           <required>true</required>
         </com.cloudbees.plugins.credentials.CredentialsParameterDefinition>
-        <hudson.model.PasswordParameterDefinition>
+        <hudson.model.StringParameterDefinition>
           <name>MONGODB_URI</name>
           <description>The Uri of MongoDB used by the Hello world App. Format: mongodb://username:password@host:port</description>
           <defaultValue>{insert-mongodb-uri}</defaultValue>
           <required>true</required>
-        </hudson.model.PasswordParameterDefinition>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
