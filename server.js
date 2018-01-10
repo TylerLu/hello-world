@@ -11,7 +11,7 @@ mongoClient.connect(mongoUri, function (err, client) {
 
         if(err){
             res.writeHead(500, { 'Content-Type': 'text/plain' });
-            res.end(`Failed to connect to the database.\n${err}\n12:45`)
+            res.end(`Failed to connect to the database.\n${err}`)
             return;
         }
         
