@@ -8,40 +8,40 @@
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
-          <name>git_repo</name>
+          <name>GIT_REPO</name>
           <description>Git repository from where we&apos;re going to checkout the code (master branch) and build a docker image.
 NB! The repository must contain a Dockerfile in the root</description>
           <defaultValue>{insert-git-url}</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>docker_repository</name>
+          <name>DOCKER_REPOSITORY</name>
           <description>The docker repository</description>
           <defaultValue>{insert-container-repository}</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>registry_url</name>
+          <name>REGISTRY_URL</name>
           <description>Container Registry URL</description>
           <defaultValue>{insert-registry}</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>aks_resource_group_name</name>
+          <name>AKS_RESOURCE_GROUP_NAME</name>
           <description>Azure Container Service (AKS) Resource Group Name</description>
           <defaultValue>{insert-aks-resource-group-name}</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>aks_cluster_name</name>
+          <name>AKS_CLUSTER_NAME</name>
           <description>Azure Container Service (AKS) Cluster Name</description>
           <defaultValue>{insert-aks-cluster-name}</defaultValue>
         </hudson.model.StringParameterDefinition>
         <com.cloudbees.plugins.credentials.CredentialsParameterDefinition plugin="credentials@2.1.12">
-          <name>registry_credentials_id</name>
+          <name>REGISTRY_CREDENTIALS_ID</name>
           <description>The credentials id that points to the Container Registry credentials</description>
           <defaultValue>{insert-docker-credentials}</defaultValue>
           <credentialType>com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl</credentialType>
           <required>true</required>
         </com.cloudbees.plugins.credentials.CredentialsParameterDefinition>
         <com.cloudbees.plugins.credentials.CredentialsParameterDefinition plugin="credentials@2.1.12">
-          <name>azure_service_principal_id</name>
+          <name>AZURE_SERVICE_PRINCIPAL_ID</name>
           <description>The Azure service princinpal id used to deploy configurations to ACS</description>
           <defaultValue>azure_service_principal</defaultValue>
           <credentialType>com.microsoft.azure.util.AzureCredentials</credentialType>

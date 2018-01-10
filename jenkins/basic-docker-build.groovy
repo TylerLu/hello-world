@@ -2,10 +2,10 @@ node {
     def built_img = ''
     def taggedImageName = ''
     stage('Checkout git repo') {
-      git branch: 'master', url: params.git_repo
+      git branch: 'master', url: params.GIT_REPO
     }
     stage('Build Docker image') {
-      built_img = docker.build(params.docker_repository + ":${env.BUILD_NUMBER}", '.')
+      built_img = docker.build(params.DOCKER_REPOSITORY + ":${env.BUILD_NUMBER}", '.')
     }
     stage('Push Docker image to Azure Container Registry') {
       docker.withRegistry(params.registry_url, params.registry_credentials_id ) {
@@ -15,7 +15,7 @@ node {
     }
     stage('Deploy configurations to Azure Container Service (AKS)') {
       withEnv(['TAGGED_IMAGE_NAME=' + taggedImageName]) {
-        acsDeploy azureCredentialsId: params.azure_service_principal_id, configFilePaths: 'kubernetes/*.yaml', containerService: params.aks_cluster_name + ' | AKS', dcosDockerCredentialsPath: '', enableConfigSubstitution: true, resourceGroupName: params.aks_resource_group_name, secretName: '', sshCredentialsId: ''
+        acsDeploy azureCredentialsId: params.AZURE_SERVICE_PRINCIPAL_ID, configFilePaths: 'kubernetes/*.yaml', containerService: params.AKS_CLUSTER_NAME + ' | AKS', dcosDockerCredentialsPath: '', enableConfigSubstitution: true, resourceGroupName: params.AKS_RESOURCE_GROUP_NAME, secretName: '', sshCredentialsId: ''
       }
     }
 }
