@@ -11,6 +11,6 @@ spec:
     spec:
       containers:
       - name: hello-world
-        image: $TAGGED_IMAGE_NAM
+        image: qfsnli6k6dl62.azurecr.io/hello-world:9
         ports:
         - containerPort: 80
