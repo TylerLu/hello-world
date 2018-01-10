@@ -8,7 +8,7 @@ node {
       built_img = docker.build(params.DOCKER_REPOSITORY + ":${env.BUILD_NUMBER}", '.')
     }
     stage('Push Docker image to Azure Container Registry') {
-      docker.withRegistry(params.registry_url, params.registry_credentials_id ) {
+      docker.withRegistry(params.REGISTRY_URL, params.REGISTRY_CREDENTIALS_ID ) {
         taggedImageName = built_img.tag("${env.BUILD_NUMBER}")
         built_img.push("${env.BUILD_NUMBER}");
       }
