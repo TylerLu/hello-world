@@ -14,6 +14,8 @@ node {
       }
     }
     stage('Deploy configurations to Azure Container Service (AKS)') {
-      acsDeploy azureCredentialsId: params.azure_service_principal_id, configFilePaths: 'kubernetes/*.yaml', containerService: params.aks_cluster_name + ' | AKS', dcosDockerCredentialsPath: '', enableConfigSubstitution: true, resourceGroupName: params.aks_resource_group_name, secretName: '', sshCredentialsId: ''
+      withEnv(['IMAGE_NAME=' + taggedImageName]) {
+        acsDeploy azureCredentialsId: params.azure_service_principal_id, configFilePaths: 'kubernetes/*.yaml', containerService: params.aks_cluster_name + ' | AKS', dcosDockerCredentialsPath: '', enableConfigSubstitution: true, resourceGroupName: params.aks_resource_group_name, secretName: '', sshCredentialsId: ''
+      }
     }
 }
