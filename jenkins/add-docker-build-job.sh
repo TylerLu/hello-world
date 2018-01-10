@@ -15,6 +15,7 @@ Arguments
   --repository|-rr                          : Repository targeted by the pipeline
   --aks_resource_group_name|-agn  [Required]: Name of the resource group which contains the AKS
   --aks_cluster_name|-acn         [Required]: Name of the AKS cluster
+  --mongodb_uri|-mu               [Required]: URI of the MongoDB
   --credentials_id|-ci                      : Desired Jenkins credentials id
   --credentials_desc|-cd                    : Desired Jenkins credentials description
   --job_short_name|-jsn                     : Desired Jenkins job short name
@@ -104,6 +105,10 @@ do
       aks_cluster_name="$1"
       shift
       ;;
+    --mongodb_uri|-mu)
+      mongodb_uri="$1"
+      shift
+      ;;
     --credentials_id|-ci)
       credentials_id="$1"
       shift
@@ -161,6 +166,7 @@ throw_if_empty --registry_user_name $registry_user_name
 throw_if_empty --registry_password $registry_password
 throw_if_empty --aks_resource_group_name $aks_resource_group_name
 throw_if_empty --aks_cluster_name $aks_cluster_name
+throw_if_empty --aks_cluster_name $mongodb_uri
 
 #download dependencies
 job_xml=$(curl -s ${artifacts_location}/jenkins/basic-docker-build-job.xml${artifacts_location_sas_token})
@@ -181,6 +187,7 @@ job_xml=${job_xml//'{insert-aks-resource-group-name}'/${aks_resource_group_name}
 job_xml=${job_xml//'{insert-aks-cluster-name}'/${aks_cluster_name}}
 job_xml=${job_xml//'{insert-docker-credentials}'/${credentials_id}}
 job_xml=${job_xml//'{insert-container-repository}'/${repository}}
+job_xml=${job_xml//'{insert-mongodb-uri}'/${mongodb_uri}}
 
 if [ -n "${scm_poll_schedule}" ]
 then

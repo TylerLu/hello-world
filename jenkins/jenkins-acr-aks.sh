@@ -18,6 +18,7 @@ Arguments
   --service_principal_secret|-ss  [Required] : The service principal secret.
   --subscription_id|-subid        [Required] : The subscription ID of the SP.
   --tenant_id|-tid                [Required] : The tenant id of the SP.
+  --mongodb_uri|-mu               [Required]: URI of the MongoDB
   --artifacts_location|-al                   : Url used to reference other scripts/artifacts.
   --sas_token|-st                            : A sas token needed if the artifacts location is private.
 EOF
@@ -103,6 +104,10 @@ do
       tenant_id="$1"
       shift
       ;;
+    --mongodb_uri|-mu)
+      mongodb_uri="$1"
+      shift
+      ;;
     --artifacts_location|-al)
       artifacts_location="$1"
       shift
@@ -133,6 +138,7 @@ throw_if_empty --subscription_id $subscription_id
 throw_if_empty --tenant_id $tenant_id
 throw_if_empty --resource_group_name $resource_group_name
 throw_if_empty --cluster_name $cluster_name
+throw_if_empty --cluster_name $mongodb_uri
 
 #install jenkins
 run_util_script "jenkins/install_jenkins.sh" -jf "${jenkins_fqdn}" -spid "${service_principal_id}" -ss "${service_principal_secret}" -subid "${subscription_id}" -tid "${tenant_id}" -al "${artifacts_location}" -st "${artifacts_location_sas_token}"
@@ -159,4 +165,4 @@ job_display_name="Hello World Build &amp; Deploy"
 job_description="A pipeline that builds a Docker image, pushed built image to ACR, and deploy configurations to AKS."
 
 echo "Including the pipeline"
-run_util_script "jenkins/add-docker-build-job.sh" -j "http://localhost:8080/" -ju "admin" -jsn "${job_short_name}" -jdn "${job_display_name}" -jd "${job_description}" -g "${git_url}" -r "${registry}" -ru "${registry_user_name}" -rp "${registry_password}" -rr "$repository" -agn "${resource_group_name}" -acn "${cluster_name}" -sps "* * * * *" -al "$artifacts_location" -st "$artifacts_location_sas_token"
+run_util_script "jenkins/add-docker-build-job.sh" -j "http://localhost:8080/" -ju "admin" -jsn "${job_short_name}" -jdn "${job_display_name}" -jd "${job_description}" -g "${git_url}" -r "${registry}" -ru "${registry_user_name}" -rp "${registry_password}" -rr "$repository" -agn "${resource_group_name}" -acn "${cluster_name}" -mu "${mongodb_uri}" -sps "* * * * *" -al "$artifacts_location" -st "$artifacts_location_sas_token"

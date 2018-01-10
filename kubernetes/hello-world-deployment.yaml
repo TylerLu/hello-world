@@ -15,5 +15,5 @@ spec:
         ports:
         - containerPort: 80
         env:
-        - name: MONGO_URI
-          value: "$MONGO_URI"
+        - name: MONGODB_URI
+          value: "$MONGODB_URI"

@@ -359,7 +359,7 @@
                 ]
               },
               "protectedSettings": {
-                "commandToExecute": "[concat('./' , variables('_extensionScript'),' -jf \"', reference(variables('jenkinsPublicIPAddressName')).dnsSettings.fqdn, '\" -u \"', parameters('adminUsername') , '\" -g \"', parameters('gitRepository') , '\" -r \"https://',reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))).loginServer, '\" -ru \"', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-10-01').username, '\" -rp \"', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-10-01').passwords[0].value, '\" -subid \"', subscription().subscriptionId, '\" -tid \"', subscription().tenantId, '\" -spid \"', parameters('servicePrincipalClientId'), '\" -ss \"', parameters('servicePrincipalClientSecret'), '\" -gn \"', resourceGroup().name,  '\" -cn \"', parameters('kubernetesClusterName') , '\" -al \"', parameters('jenkinsArtifactsLocation'), '\" -st \"', variables('_artifactsLocationSasToken'), '\"' )]"
+                "commandToExecute": "[concat('./' , variables('_extensionScript'), ' -jf \"', reference(variables('jenkinsPublicIPAddressName')).dnsSettings.fqdn, '\" -u \"', parameters('adminUsername') , '\" -g \"', parameters('gitRepository') , '\" -r \"https://',reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))).loginServer, '\" -ru \"', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-10-01').username, '\" -rp \"', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-10-01').passwords[0].value, '\" -subid \"', subscription().subscriptionId, '\" -tid \"', subscription().tenantId, '\" -spid \"', parameters('servicePrincipalClientId'), '\" -ss \"', parameters('servicePrincipalClientSecret'), '\" -gn \"', resourceGroup().name,  '\" -cn \"', parameters('kubernetesClusterName'), '\" -mu \"', concat('mongodb://', variables('comsosDbName'), ':', uriComponent(listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts', variables('comsosDbName')), '2015-04-08').primaryMasterKey), '@', variables('comsosDbName'), '.documents.azure.com:10255/?ssl=true&replicaSet=globaldb'), '\" -al \"', parameters('jenkinsArtifactsLocation'), '\" -st \"', variables('_artifactsLocationSasToken'), '\"' )]"
               }
             }
           }
@@ -412,10 +412,6 @@
       "azureContainerRegistryUrl": {
         "type": "string",
         "value": "[reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))).loginServer]"
-      },
-      "comsosDbConnectionString": {
-        "type": "string",
-        "value": "[concat('mongodb://', variables('comsosDbName'), ':', listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts', variables('comsosDbName')), '2015-04-08').primaryMasterKey, '@', variables('comsosDbName'), '.documents.azure.com:10255/?ssl=true&replicaSet=globaldb')]"
       },
       "kubernetesControlPlaneFQDN": {
         "type": "string",

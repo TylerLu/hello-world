@@ -2,10 +2,10 @@
 var http = require('http');
 var mongoClient = require('mongodb').MongoClient;
 
-var mongoUri = process.env.MONGO_URI || '';
+var mongoDBUri = process.env.MONGODB_URI || '';
 var port = process.env.PORT || 80;
 
-mongoClient.connect(mongoUri, function (err, client) {
+mongoClient.connect(mongoDBUri, function (err, client) {
 
     http.createServer(function (req, res) {
 
