@@ -11,6 +11,6 @@ spec:
     spec:
       containers:
       - name: hello-world
-        image: qfsnli6k6dl62.azurecr.io/hello-world:9
+        image: qfsnli6k6dl62.azurecr.io/hello-world:$BUILD_NUMBER
         ports:
         - containerPort: 80
