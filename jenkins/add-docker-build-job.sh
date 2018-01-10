@@ -172,22 +172,39 @@ throw_if_empty --aks_cluster_name $mongodb_uri
 job_xml=$(curl -s ${artifacts_location}/jenkins/basic-docker-build-job.xml${artifacts_location_sas_token})
 credentials_xml=$(curl -s ${artifacts_location}/jenkins/basic-user-pwd-credentials.xml${artifacts_location_sas_token})
 
+#escape xml reserved characters
+escapsed_credentials_id=credentials_id|xmlstarlet esc
+escapsed_credentials_desc=credentials_desc|xmlstarlet esc
+escapsed_registry_user_name=registry_user_name|xmlstarlet esc
+escapsed_registry_password=registry_password|xmlstarlet esc
+
 #prepare credentials.xml
-credentials_xml=${credentials_xml//'{insert-credentials-id}'/${credentials_id}}
-credentials_xml=${credentials_xml//'{insert-credentials-description}'/${credentials_desc}}
-credentials_xml=${credentials_xml//'{insert-user-name}'/${registry_user_name}}
-credentials_xml=${credentials_xml//'{insert-user-password}'/${registry_password}}
+credentials_xml=${credentials_xml//'{insert-credentials-id}'/${escapsed_credentials_id}}
+credentials_xml=${credentials_xml//'{insert-credentials-description}'/${escapsed_credentials_desc}}
+credentials_xml=${credentials_xml//'{insert-user-name}'/${escapsed_registry_user_name}}
+credentials_xml=${credentials_xml//'{insert-user-password}'/${escapsed_registry_password}}
+
+#escape xml reserved characters
+escapsed_job_display_name=job_display_name|xmlstarlet esc
+escapsed_job_description=job_description|xmlstarlet esc
+escapsed_git_url=git_url|xmlstarlet esc
+escapsed_registry=registry|xmlstarlet esc
+escapsed_aks_resource_group_name=aks_resource_group_name|xmlstarlet esc
+escapsed_aks_cluster_name=aks_cluster_name|xmlstarlet esc
+escapsed_credentials_id=credentials_id|xmlstarlet esc
+escapsed_repository=repository|xmlstarlet esc
+escapsed_mongodb_uri=mongodb_uri|xmlstarlet esc
 
 #prepare job.xml
-job_xml=${job_xml//'{insert-job-display-name}'/${job_display_name}}
-job_xml=${job_xml//'{insert-job-description}'/${job_description}}
-job_xml=${job_xml//'{insert-git-url}'/${git_url}}
-job_xml=${job_xml//'{insert-registry}'/${registry}}
-job_xml=${job_xml//'{insert-aks-resource-group-name}'/${aks_resource_group_name}}
-job_xml=${job_xml//'{insert-aks-cluster-name}'/${aks_cluster_name}}
-job_xml=${job_xml//'{insert-docker-credentials}'/${credentials_id}}
-job_xml=${job_xml//'{insert-container-repository}'/${repository}}
-job_xml=${job_xml//'{insert-mongodb-uri}'/${mongodb_uri}}
+job_xml=${job_xml//'{insert-job-display-name}'/${escapsed_job_display_name}}
+job_xml=${job_xml//'{insert-job-description}'/${escapsed_job_description}}
+job_xml=${job_xml//'{insert-git-url}'/${escapsed_git_url}}
+job_xml=${job_xml//'{insert-registry}'/${escapsed_registry}}
+job_xml=${job_xml//'{insert-aks-resource-group-name}'/${escapsed_aks_resource_group_name}}
+job_xml=${job_xml//'{insert-aks-cluster-name}'/${escapsed_aks_cluster_name}}
+job_xml=${job_xml//'{insert-docker-credentials}'/${escapsed_credentials_id}}
+job_xml=${job_xml//'{insert-container-repository}'/${escapsed_repository}}
+job_xml=${job_xml//'{insert-mongodb-uri}'/${escapsed_mongodb_uri}}
 
 if [ -n "${scm_poll_schedule}" ]
 then
@@ -225,10 +242,6 @@ echo "${credentials_xml}" > credentials.xml
 
 #add user/pwd
 run_util_script "jenkins/run-cli-command.sh" -j "$jenkins_url" -ju "$jenkins_username" -jp "$jenkins_password" -c 'create-credentials-by-xml SystemCredentialsProvider::SystemContextResolver::jenkins (global)' -cif "credentials.xml"
-
-echo '--------------------------'
-echo $mongodb_uri
-echo '--------------------------'
 
 #add job
 run_util_script "jenkins/run-cli-command.sh" -j "$jenkins_url" -ju "$jenkins_username" -jp "$jenkins_password" -c "create-job ${job_short_name}" -cif "job.xml"

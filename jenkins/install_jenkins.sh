@@ -471,3 +471,4 @@ sudo service nginx restart
 #install common tools
 sudo apt-get install git --yes
 sudo apt-get install azure-cli --yes
+sudo apt-get install xmlstarlet
