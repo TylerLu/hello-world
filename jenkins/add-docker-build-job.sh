@@ -226,6 +226,10 @@ echo "${credentials_xml}" > credentials.xml
 #add user/pwd
 run_util_script "jenkins/run-cli-command.sh" -j "$jenkins_url" -ju "$jenkins_username" -jp "$jenkins_password" -c 'create-credentials-by-xml SystemCredentialsProvider::SystemContextResolver::jenkins (global)' -cif "credentials.xml"
 
+echo '--------------------------'
+echo $mongodb_uri
+echo '--------------------------'
+
 #add job
 run_util_script "jenkins/run-cli-command.sh" -j "$jenkins_url" -ju "$jenkins_username" -jp "$jenkins_password" -c "create-job ${job_short_name}" -cif "job.xml"
 
