@@ -14,3 +14,6 @@ spec:
         image: $TAGGED_IMAGE_NAME
         ports:
         - containerPort: 80
+        env:
+        - name: MONGO_URI
+          value: "mongodb://vdaw7qp37v4v2:r8enaae0YbQebKcbEAO4yrsuhnbHEh86OwJAVBCxf6nLgMnqptzHlPbACT7T0pIDjYHXh1wvlJPeY6ob6P3zcw%3D%3D@vdaw7qp37v4v2.documents.azure.com:10255/?ssl=true&replicaSet=globaldb"
