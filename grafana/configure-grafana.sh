@@ -54,11 +54,28 @@ while getopts A:p:S:T:i:s::h optname; do
   esac
 done
 
+function retry_until_successful {
+  counter=0
+  "${@}"
+  while [ $? -ne 0 ]; do
+    if [[ "$counter" -gt 20 ]]; then
+        exit 1
+    else
+        let counter++
+    fi
+    sleep 6
+    "${@}"
+  done;
+}
+
 function post_json() {
    curl -X POST http://admin:$ADMIN_PWD@localhost:$GRAFANA_PORT$1 \
      -H "Content-Type: application/json" \
      -d "$2"
 }
+
+#wait until Grafana gets started
+retry_until_successful curl http://localhost:$GRAFANA_PORT$1
 
 #add Azure Monitor data source
 post_json "/api/datasources" "$(cat <<EOF
