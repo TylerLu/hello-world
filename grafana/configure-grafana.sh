@@ -91,7 +91,7 @@ post_json "/api/datasources" "$(cat <<EOF
         "clientId":"${CLIENT_ID}"
     },
     "secureJsonData": {
-        "clientSecret": "${CLIENT_SECRET}}"
+        "clientSecret": "${CLIENT_SECRET}"
     }
 }
 EOF
