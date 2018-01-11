@@ -72,6 +72,8 @@ post_json "/api/datasources" "$(cat <<EOF
         "subscriptionId": "${SUBSCRIPTION_ID}",
         "tenantId":"${TENANT_ID}",
         "clientId":"${CLIENT_ID}",
+    },
+    "secureJsonData": {
         "clientSecret": "${CLIENT_SECRET}}"
     }
 }
