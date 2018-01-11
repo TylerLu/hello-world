@@ -75,7 +75,7 @@ function post_json() {
 }
 
 #wait until Grafana gets started
-retry_until_successful curl http://localhost:$GRAFANA_PORT$1
+retry_until_successful curl http://localhost:$GRAFANA_PORT
 
 #add Azure Monitor data source
 post_json "/api/datasources" "$(cat <<EOF
@@ -88,7 +88,7 @@ post_json "/api/datasources" "$(cat <<EOF
     "jsonData": {
         "subscriptionId": "${SUBSCRIPTION_ID}",
         "tenantId":"${TENANT_ID}",
-        "clientId":"${CLIENT_ID}",
+        "clientId":"${CLIENT_ID}"
     },
     "secureJsonData": {
         "clientSecret": "${CLIENT_SECRET}}"
