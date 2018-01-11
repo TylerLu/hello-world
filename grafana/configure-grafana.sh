@@ -55,7 +55,7 @@ while getopts A:p:S:T:i:s::h optname; do
 done
 
 function post_json() {
-   curl -X POST http://admin:$ADMIN_PWD@52.226.75.108:$GRAFANA_PORT$1 \
+   curl -X POST http://admin:$ADMIN_PWD@localhost:$GRAFANA_PORT$1 \
      -H "Content-Type: application/json" \
      -d "$2"
 }

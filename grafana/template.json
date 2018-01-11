@@ -164,14 +164,16 @@
                 "description": "Base URL for Marketplace",
                 "artifactsBaseUrl": ""
             },
-            "defaultValue": "https://gallery.azure.com/artifact/20151001/grafana-labs.grafana_ossstable.1.0.2/Artifacts"
+            "defaultValue": ""
         }
     },
     "variables": {
         "installScripts": [
-            "[concat(parameters('baseUrl'), '/scripts/install-grafana.sh')]"
+            "https://gallery.azure.com/artifact/20151001/grafana-labs.grafana_ossstable.1.0.2/Artifacts/scripts/install-grafana.sh']",
+            "https://raw.githubusercontent.com/TylerLu/hello-world/master/grafana/configure-grafana.sh"
         ],
         "installOpts": "[concat('-A ', parameters('grafanaAdminPassword'))]",
+        "configureOpts": "-A \"Beat%40Apple123\" -p \"3000\" -S \"3b7912c3-ad06-426e-8627-41912372774b\" -T \"3dad2b09-9e66-4eb8-9bef-9f44544b0e74\" -i \"b3486972-fff3-4a67-bc97-b37a86bbe654\" -s \"3526bb0d-1d66-41bd-baa1-0301e0638aa2\"",
         "nicName": "[concat(parameters('namespace'), '-nic')]",
         "publicIPAddressType": "Dynamic",
         "vmStorageAccountContainerName": "vhds",
@@ -369,7 +371,7 @@
                             "fileUris": "[variables('installScripts')]"
                         },
                         "protectedSettings": {
-                            "commandToExecute": "[concat('bash install-grafana.sh ', variables('installOpts'))]"
+                            "commandToExecute": "[concat('bash install-grafana.sh ', variables('installOpts'), '; bash configure-grafana.sh ', variables('configureOpts'))]"
                         }
                     }
                 }
