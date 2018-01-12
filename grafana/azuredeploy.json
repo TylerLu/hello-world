@@ -23,6 +23,9 @@
     }, 
     "subnetId": {
       "type": "string"
+    },
+    "_artifactsLocation": {
+      "type": "string"
     }
   },
   "variables": {
