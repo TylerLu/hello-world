@@ -14,12 +14,18 @@
           "description": "Service Principal Client Secret used by Jenkins and Azure Container Service(AKS)."
         }
       },
-      "adminUsername": {
+      "linuxAdminUsername": {
         "type": "string",
         "metadata": {
           "description": "User name for the Linux Virtual Machines (Jenkins and Kubernetes)."
         },
         "defaultValue": "azureuser"
+      },
+      "linuxSSHPublicKey": {
+        "type": "string",
+        "metadata": {
+          "description": "Configure all linux machines with the SSH RSA public key string. Your key should include three parts, for example 'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm'"
+        }
       },
       "jenkinsAdminPassword": {
         "type": "securestring",
@@ -31,12 +37,6 @@
         "type": "string",
         "metadata": {
           "description": "Unique DNS Name for the Public IP used to access the Jenkins Virtual Machine."
-        }
-      },
-      "kubernetesSshRSAPublicKey": {
-        "type": "string",
-        "metadata": {
-          "description": "Configure all linux machines with the SSH RSA public key string. Your key should include three parts, for example 'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm'"
         }
       },
       "kubernetesDnsPrefix": {
@@ -314,8 +314,18 @@
           },
           "osProfile": {
             "computerName": "[variables('jenkinsVmNameme')]",
-            "adminUsername": "[parameters('adminUsername')]",
-            "adminPassword": "[parameters('jenkinsAdminPassword')]"
+            "adminUsername": "[parameters('linuxAdminUsername')]",
+            "linuxConfiguration": {
+              "disablePasswordAuthentication": "true",
+              "ssh": {
+                "publicKeys": [
+                  {
+                    "path": "[concat('/home/', parameters('linuxAdminUsername'), '/.ssh/authorized_keys')]",
+                    "keyData": "[parameters('linuxSSHPublicKey')]"
+                  }
+                ]
+              }
+            }
           },
           "storageProfile": {
             "imageReference": {
@@ -359,7 +369,7 @@
                 ]
               },
               "protectedSettings": {
-                "commandToExecute": "[concat('./' , variables('_extensionScript'), ' -jf \"', reference(variables('jenkinsPublicIPAddressName')).dnsSettings.fqdn, '\" -u \"', parameters('adminUsername') , '\" -g \"', parameters('gitRepository') , '\" -r \"https://',reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))).loginServer, '\" -ru \"', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-10-01').username, '\" -rp \"', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-10-01').passwords[0].value, '\" -subid \"', subscription().subscriptionId, '\" -tid \"', subscription().tenantId, '\" -spid \"', parameters('servicePrincipalClientId'), '\" -ss \"', parameters('servicePrincipalClientSecret'), '\" -gn \"', resourceGroup().name,  '\" -cn \"', parameters('kubernetesClusterName'), '\" -mu \"', concat('mongodb://', variables('comsosDbName'), ':', uriComponent(listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts', variables('comsosDbName')), '2015-04-08').primaryMasterKey), '@', variables('comsosDbName'), '.documents.azure.com:10255/?ssl=true&replicaSet=globaldb'), '\" -al \"', parameters('jenkinsArtifactsLocation'), '\" -st \"', variables('_artifactsLocationSasToken'), '\"' )]"
+                "commandToExecute": "[concat('./' , variables('_extensionScript'), ' -jf \"', reference(variables('jenkinsPublicIPAddressName')).dnsSettings.fqdn, '\" -u \"', parameters('linuxAdminUsername') , '\" -g \"', parameters('gitRepository') , '\" -r \"https://',reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))).loginServer, '\" -ru \"', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-10-01').username, '\" -rp \"', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-10-01').passwords[0].value, '\" -subid \"', subscription().subscriptionId, '\" -tid \"', subscription().tenantId, '\" -spid \"', parameters('servicePrincipalClientId'), '\" -ss \"', parameters('servicePrincipalClientSecret'), '\" -gn \"', resourceGroup().name,  '\" -cn \"', parameters('kubernetesClusterName'), '\" -mu \"', concat('mongodb://', variables('comsosDbName'), ':', uriComponent(listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts', variables('comsosDbName')), '2015-04-08').primaryMasterKey), '@', variables('comsosDbName'), '.documents.azure.com:10255/?ssl=true&replicaSet=globaldb'), '\" -al \"', parameters('jenkinsArtifactsLocation'), '\" -st \"', variables('_artifactsLocationSasToken'), '\"' )]"
               }
             }
           }
@@ -384,14 +394,14 @@
               }
             ],
             "linuxProfile": {
-              "adminUsername": "[parameters('adminUsername')]",
+              "adminUsername": "[parameters('linuxAdminUsername')]",
               "ssh": {
                 "publicKeys": [
                   {
-                    "keyData": "[parameters('kubernetesSshRSAPublicKey')]"
+                    "keyData": "[parameters('linuxSSHPublicKey')]"
                   }
                 ]
-            }
+              }
             },
             "servicePrincipalProfile": {
                 "ClientId": "[parameters('servicePrincipalClientId')]",
@@ -407,7 +417,7 @@
       },
       "jenkinsSSH": {
         "type": "string",
-        "value": "[concat('ssh -L 8080:localhost:8080 ', parameters('adminUsername'), '@', reference(variables('jenkinsPublicIPAddressName')).dnsSettings.fqdn)]"
+        "value": "[concat('ssh -L 8080:localhost:8080 ', parameters('linuxAdminUsername'), '@', reference(variables('jenkinsPublicIPAddressName')).dnsSettings.fqdn)]"
       },
       "azureContainerRegistryUrl": {
         "type": "string",
