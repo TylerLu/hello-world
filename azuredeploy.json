@@ -210,19 +210,45 @@
             "contentVersion": "1.0.0.0"
           },
           "parameters": {
-            "resourcePrefix": "[variables('jenkinsResourcePrefix')]",
-            "linuxAdminUsername": "[parameters('linuxAdminUsername')]",
-            "linuxSSHPublicKey": "[parameters('linuxSSHPublicKey')]",
-            "dnsPrefix": "[parameters('jenkinsDnsPrefix')]",
-            "subnetId": "[concat(resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName')), '/subnets/', variables('subnetName'))]",
-            "gitRepository": "[parameters('gitRepository')]",
-            "acrServer": "[reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))).loginServer]",
-            "acrUsername": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-10-01').username]",
-            "acrPassword": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-10-01').passwords[0].value]",
-            "mongoDBURI": "[concat('mongodb://', variables('comsosDbName'), ':', uriComponent(listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts', variables('comsosDbName')), '2015-04-08').primaryMasterKey), '@', variables('comsosDbName'), '.documents.azure.com:10255/?ssl=true&replicaSet=globaldb')]",
-            "kubernetesResourceGroupName": "[resourceGroup().name]",
-            "kubernetesClusterName": "[parameters('kubernetesClusterName')]",
-            "_artifactsLocation": "[parameters('_artifactsLocation')]"
+            "resourcePrefix": {
+              "value": "[variables('jenkinsResourcePrefix')]"
+            },
+            "linuxAdminUsername": {
+              "value": "[parameters('linuxAdminUsername')]"
+            },
+            "linuxSSHPublicKey": {
+              "value": "[parameters('linuxSSHPublicKey')]"
+            },
+            "dnsPrefix": {
+              "value": "[parameters('jenkinsDnsPrefix')]"
+            },
+            "subnetId": {
+              "value": "[concat(resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName')), '/subnets/', variables('subnetName'))]"
+            },
+            "gitRepository": {
+              "value": "[parameters('gitRepository')]"
+            },
+            "acrServer": {
+              "value": "[reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))).loginServer]"
+            },
+            "acrUsername": {
+              "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-10-01').username]"
+            },
+            "acrPassword": {
+              "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-10-01').passwords[0].value]"
+            },
+            "mongoDBURI": {
+              "value": "[concat('mongodb://', variables('comsosDbName'), ':', uriComponent(listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts', variables('comsosDbName')), '2015-04-08').primaryMasterKey), '@', variables('comsosDbName'), '.documents.azure.com:10255/?ssl=true&replicaSet=globaldb')]"
+            },
+            "kubernetesResourceGroupName": {
+              "value": "[resourceGroup().name]"
+            },
+            "kubernetesClusterName": {
+              "value": "[parameters('kubernetesClusterName')]"
+            },
+            "_artifactsLocation": {
+              "value": "[parameters('_artifactsLocation')]"
+            }
           }
         },
         "dependsOn": [          
