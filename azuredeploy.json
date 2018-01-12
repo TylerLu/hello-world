@@ -27,6 +27,18 @@
           "description": "Configure all linux machines with the SSH RSA public key string. Your key should include three parts, for example 'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm'"
         }
       },
+      "comsosDbName": {
+        "type": "string",
+        "metadata": {
+          "description": "Name of the ComsosDB."
+        }
+      },
+      "acrName": {
+        "type": "string",
+        "metadata": {
+          "description": "Name of the Azure Container Registery."
+        }
+      },      
       "jenkinsDnsPrefix": {
         "type": "string",
         "metadata": {
@@ -150,8 +162,8 @@
     },
     "variables": {
       "jenkinsResourcePrefix": "jenkins",
-      "comsosDbName": "[uniqueString(resourceGroup().id)]",
-      "acrName": "[uniqueString(resourceGroup().id)]",
+      "comsosDbName": "[parameters('comsosDbName')]",
+      "acrName": "[parameters('acrName')]",
       "virtualNetworkName": "virtual-network",
       "subnetName": "default-subnet"
     },
