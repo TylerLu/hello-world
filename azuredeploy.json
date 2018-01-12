@@ -213,6 +213,12 @@
             "resourcePrefix": {
               "value": "[variables('jenkinsResourcePrefix')]"
             },
+            "servicePrincipalClientId": {
+              "value": "[parameters('servicePrincipalClientId')]"
+            },
+            "servicePrincipalClientSecret": {
+              "value": "[parameters('servicePrincipalClientSecret')]"
+            },
             "linuxAdminUsername": {
               "value": "[parameters('linuxAdminUsername')]"
             },
