@@ -140,8 +140,7 @@
         "name": "[variables('vmNameme')]",
         "location": "[resourceGroup().location]",
         "dependsOn": [
-          "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]",
-          "[resourceId('Microsoft.ContainerRegistry/registries', parameters('acrName'))]"
+          "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
         ],
         "properties": {
           "hardwareProfile": {
