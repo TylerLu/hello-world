@@ -229,7 +229,7 @@
             "contentVersion": "1.0.0.0"
           },
           "parameters": {
-            "resourcePrefix": {
+            "jenkinsVMName": {
               "value": "[variables('jenkinsVMName')]"
             },
             "servicePrincipalClientId": {
