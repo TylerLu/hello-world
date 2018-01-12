@@ -152,7 +152,7 @@
       "jenkinsResourcePrefix": "jenkins",
       "comsosDbName": "[uniqueString(resourceGroup().id)]",
       "acrName": "[uniqueString(resourceGroup().id)]",
-      "virtualNetworkName": "virtual-networt",
+      "virtualNetworkName": "virtual-network",
       "subnetName": "default-subnet"
     },
     "resources": [
@@ -243,7 +243,7 @@
             "acrPassword": {
               "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-10-01').passwords[0].value]"
             },
-            "mongoDBURI": {
+            "mongoDbURI": {
               "value": "[concat('mongodb://', variables('comsosDbName'), ':', uriComponent(listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts', variables('comsosDbName')), '2015-04-08').primaryMasterKey), '@', variables('comsosDbName'), '.documents.azure.com:10255/?ssl=true&replicaSet=globaldb')]"
             },
             "kubernetesResourceGroupName": {
