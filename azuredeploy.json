@@ -206,7 +206,7 @@
         "properties": {
           "mode": "Incremental",
           "templateLink": {
-            "uri": "[uri(deployment().properties.templateLink.uri, '/jenkins/azuredeploy.json')]",
+            "uri": "[uri(deployment().properties.templateLink.uri, 'jenkins/azuredeploy.json')]",
             "contentVersion": "1.0.0.0"
           },
           "parameters": {
