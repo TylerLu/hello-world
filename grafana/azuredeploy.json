@@ -169,8 +169,8 @@
             "autoUpgradeMinorVersion": true,
             "settings": {
               "fileUris": [
-                "[concat(parameters('_artifactsLocation'), 'scripts/install-grafana.sh')]",
-                "[concat(parameters('_artifactsLocation'), 'scripts/configure-grafana.sh')]"
+                "[concat(parameters('_artifactsLocation'), 'grafana/install-grafana.sh')]",
+                "[concat(parameters('_artifactsLocation'), 'grafana/configure-grafana.sh')]"
               ]
             },
             "protectedSettings": {
