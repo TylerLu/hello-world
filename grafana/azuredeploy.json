@@ -30,7 +30,7 @@
   },
   "variables": {
     "installOpts": "[concat('-A ', parameters('linuxAdminPassword'))]",
-    "configureOpts": "[concat('-A \"', uriComponent(parameters('linuxAdminPassword')), '\" -p \"3000\" -S \"', subscription().subscriptionId, '\" -T \"', subscription().tenantId, '\" -i \"', parameters('servicePrincipalClientId'), '\" -s \"', parameters('servicePrincipalClientSecret'), '\")]",
+    "configureOpts": "[concat('-A \"', uriComponent(parameters('linuxAdminPassword')), '\" -p \"3000\" -S \"', subscription().subscriptionId, '\" -T \"', subscription().tenantId, '\" -i \"', parameters('servicePrincipalClientId'), '\" -s \"', parameters('servicePrincipalClientSecret'), '\"')]",
     "nicName": "[concat(parameters('grafanaVMName'), '-nic')]",
     "publicIPAddressName": "[concat(parameters('grafanaVMName'), '-ip')]",
     "securityGroupName": "[concat(parameters('grafanaVMName'), '-nsg')]"
