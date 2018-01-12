@@ -44,11 +44,17 @@
         "metadata": {
           "description": "Name of the Azure Container Registery. The name may contain alpha numeric characters only and must be between 5 and 50 characters."
         }
-      },      
+      },
       "jenkinsDnsPrefix": {
         "type": "string",
         "metadata": {
           "description": "Unique DNS Name for the Public IP used to access the Jenkins Virtual Machine."
+        }
+      },
+      "grafanaDnsPrefix": {
+        "type": "string",
+        "metadata": {
+          "description": "Unique DNS Name for the Public IP used to access the Grafana Virtual Machine."
         }
       },
       "kubernetesDnsPrefix": {
@@ -343,7 +349,7 @@
               "value": "[parameters('linuxAdminPassword')]"
             },
             "dnsPrefix": {
-              "value": "[parameters('jenkinsDnsPrefix')]"
+              "value": "[parameters('grafanaDnsPrefix')]"
             },
             "subnetId": {
               "value": "[concat(resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName')), '/subnets/', variables('subnetName'))]"
