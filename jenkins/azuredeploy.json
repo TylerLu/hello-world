@@ -2,7 +2,7 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-      "resourcePrefix": {
+      "jenkinsVMName": {
         "type": "string",
         "defaultValue": "jenkins"
       },
@@ -50,13 +50,11 @@
       }
     },
     "variables": {
-      "nicName": "[concat(parameters('resourcePrefix'), '-nic')]",
-      "publicIPAddressName": "[concat(parameters('resourcePrefix'), '-ip')]",
-      "vmNameme": "[concat(parameters('resourcePrefix'), '')]",
-      "vmExtensionName": "[concat(parameters('resourcePrefix'), '-ini')]",
-      "frontEndNSGName": "[concat(parameters('resourcePrefix'), '-nsg')]",
-      "_extensionScript": "jenkins-acr-aks.sh",
-      "_artifactsLocationSasToken": ""
+      "nicName": "[concat(parameters('jenkinsVMName'), '-nic')]",
+      "publicIPAddressName": "[concat(parameters('jenkinsVMName'), '-ip')]",
+      "vmNameme": "[concat(parameters('jenkinsVMName'), '')]",
+      "vmExtensionName": "[concat(parameters('jenkinsVMName'), '-ini')]",
+      "securityGroupName": "[concat(parameters('jenkinsVMName'), '-nsg')]"
     },
     "resources": [
       {
@@ -74,7 +72,7 @@
       {
         "apiVersion": "2015-06-15",
         "type": "Microsoft.Network/networkSecurityGroups",
-        "name": "[variables('frontEndNSGName')]",
+        "name": "[variables('securityGroupName')]",
         "location": "[resourceGroup().location]",
         "properties": {
           "securityRules": [
@@ -131,7 +129,10 @@
                 }
               }
             }
-          ]
+          ],            
+          "networkSecurityGroup": {
+            "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('securityGroupName'))]"
+          }
         }
       },
       {
@@ -199,11 +200,11 @@
               "autoUpgradeMinorVersion": true,
               "settings": {
                 "fileUris": [
-                  "[concat(parameters('_artifactsLocation'), 'jenkins/', variables('_extensionScript'), variables('_artifactsLocationSasToken'))]"
+                  "[concat(parameters('_artifactsLocation'), 'jenkins/jenkins-acr-aks.sh')]"
                 ]
               },
               "protectedSettings": {
-                "commandToExecute": "[concat('./' , variables('_extensionScript'), ' -jf \"', reference(variables('publicIPAddressName')).dnsSettings.fqdn, '\" -u \"', parameters('linuxAdminUsername') , '\" -g \"', parameters('gitRepository') , '\" -r \"https://', parameters('acrServer'), '\" -ru \"', parameters('acrUsername'), '\" -rp \"', parameters('acrPassword'), '\" -subid \"', subscription().subscriptionId, '\" -tid \"', subscription().tenantId, '\" -spid \"', parameters('servicePrincipalClientId'), '\" -ss \"', parameters('servicePrincipalClientSecret'), '\" -gn \"', parameters('kubernetesResourceGroupName'),  '\" -cn \"', parameters('kubernetesClusterName'), '\" -mu \"', parameters('mongoDbURI'), '\" -al \"', parameters('_artifactsLocation'), '\" -st \"', variables('_artifactsLocationSasToken'), '\"' )]"
+                "commandToExecute": "[concat('./jenkins-acr-aks.sh -jf \"', reference(variables('publicIPAddressName')).dnsSettings.fqdn, '\" -u \"', parameters('linuxAdminUsername') , '\" -g \"', parameters('gitRepository') , '\" -r \"https://', parameters('acrServer'), '\" -ru \"', parameters('acrUsername'), '\" -rp \"', parameters('acrPassword'), '\" -subid \"', subscription().subscriptionId, '\" -tid \"', subscription().tenantId, '\" -spid \"', parameters('servicePrincipalClientId'), '\" -ss \"', parameters('servicePrincipalClientSecret'), '\" -gn \"', parameters('kubernetesResourceGroupName'),  '\" -cn \"', parameters('kubernetesClusterName'), '\" -mu \"', parameters('mongoDbURI'), '\" -al \"', parameters('_artifactsLocation'), '\" -st \"\"' )]"
               }
             }
           }

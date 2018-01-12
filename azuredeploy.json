@@ -36,7 +36,7 @@
       "acrName": {
         "type": "string",
         "metadata": {
-          "description": "Name of the Azure Container Registery."
+          "description": "Name of the Azure Container Registery. The name may contain alpha numeric characters only and must be between 5 and 50 characters."
         }
       },      
       "jenkinsDnsPrefix": {
@@ -161,7 +161,8 @@
       }
     },
     "variables": {
-      "jenkinsResourcePrefix": "jenkins",
+      "jenkinsVMName": "jenkins",
+      "grafanaVMName": "grafana",
       "comsosDbName": "[parameters('comsosDbName')]",
       "acrName": "[parameters('acrName')]",
       "virtualNetworkName": "virtual-network",
@@ -218,12 +219,12 @@
         "properties": {
           "mode": "Incremental",
           "templateLink": {
-            "uri": "[uri(deployment().properties.templateLink.uri, 'jenkins/azuredeploy.json')]",
+            "uri": "[concat(parameters('_artifactsLocation'), 'jenkins/azuredeploy.json')]",
             "contentVersion": "1.0.0.0"
           },
           "parameters": {
             "resourcePrefix": {
-              "value": "[variables('jenkinsResourcePrefix')]"
+              "value": "[variables('jenkinsVMName')]"
             },
             "servicePrincipalClientId": {
               "value": "[parameters('servicePrincipalClientId')]"
@@ -276,24 +277,67 @@
         ]
       },
       {
+        "apiVersion": "2017-05-10",
+        "name": "grafanaDeployment",
+        "type": "Microsoft.Resources/deployments",
+        "properties": {
+          "mode": "Incremental",
+          "templateLink": {
+            "uri": "[concat(parameters('_artifactsLocation'), 'grafana/azuredeploy.json')]",
+            "contentVersion": "1.0.0.0"
+          },
+          "parameters": {
+            "grafanaVMName": {
+              "value": "[variables('grafanaVMName')]"
+            },
+            "servicePrincipalClientId": {
+              "value": "[parameters('servicePrincipalClientId')]"
+            },
+            "servicePrincipalClientSecret": {
+              "value": "[parameters('servicePrincipalClientSecret')]"
+            },
+            "linuxAdminUsername": {
+              "value": "[parameters('linuxAdminUsername')]"
+            },
+            "linuxSSHPublicKey": {
+              "value": "[parameters('linuxSSHPublicKey')]"
+            },
+            "dnsPrefix": {
+              "value": "[parameters('jenkinsDnsPrefix')]"
+            },
+            "subnetId": {
+              "value": "[concat(resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName')), '/subnets/', variables('subnetName'))]"
+            },
+            "_artifactsLocation": {
+              "value": "[parameters('_artifactsLocation')]"
+            }
+          }
+        },
+        "dependsOn": [          
+          "[resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))]",
+          "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+          "[resourceId('Microsoft.DocumentDb/databaseAccounts', variables('comsosDbName'))]"
+        ]
+      },
+      {
         "apiVersion": "2017-08-31",
         "type": "Microsoft.ContainerService/managedClusters",
         "location": "[resourceGroup().location]",
         "name": "[parameters('kubernetesClusterName')]",
         "properties": {
           "kubernetesVersion": "[parameters('kubernetesVersion')]",
-           "dnsPrefix": "[parameters('kubernetesDnsPrefix')]",
-           "agentPoolProfiles": [
-              {
-                "name": "agentpool",
-                "osDiskSizeGB": 0,
-                "count": "[parameters('kubernetesAgentCount')]",
-                "vmSize": "[parameters('kubernetesAgentVMSize')]",
-                "osType": "Linux",
-                "storageProfile": "ManagedDisks"
-              }
-            ],
-            "linuxProfile": {
+          "dnsPrefix": "[parameters('kubernetesDnsPrefix')]",
+          "agentPoolProfiles": [
+            {
+              "name": "agentpool",
+              "osDiskSizeGB": 0,
+              "count": "[parameters('kubernetesAgentCount')]",
+              "vmSize": "[parameters('kubernetesAgentVMSize')]",
+              "osType": "Linux",
+              "storageProfile": "ManagedDisks"
+            }
+          ],
+          "linuxProfile": {
               "adminUsername": "[parameters('linuxAdminUsername')]",
               "ssh": {
                 "publicKeys": [
@@ -306,9 +350,9 @@
             "servicePrincipalProfile": {
                 "ClientId": "[parameters('servicePrincipalClientId')]",
                 "Secret": "[parameters('servicePrincipalClientSecret')]"
-            }
+          }
         }
-    }
+      }
     ],
     "outputs": {
       "jenkinsURL": {
@@ -334,6 +378,10 @@
       "testURL2": {
           "type": "string",
           "value": "[uri(deployment().properties.templateLink.uri, '')]"
+      },
+      "testURL3": {
+          "type": "string",
+          "value": "[uri(deployment().properties.templateLink.uri, '/')]"
       }
     }
   }
