@@ -1,0 +1,227 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "location": {
+        "type": "string"
+      },
+      "resourcePrefix": {
+        "type": "string",
+        "defaultValue": "jenkins"
+      },
+      "servicePrincipalClientId": {
+        "type": "string"
+      },
+      "servicePrincipalClientSecret": {
+        "type": "securestring"
+      },
+      "linuxAdminUsername": {
+        "type": "string"
+      },
+      "linuxSSHPublicKey": {
+        "type": "string"
+      },
+      "dnsPrefix": {
+        "type": "string"
+      }, 
+      "subnetId": {
+        "type": "string"
+      },
+      "gitRepository": {
+        "type": "string"
+      },
+      "acrServer": {
+        "type": "string"
+      },
+      "acrUsername":{
+        "type": "string"
+      },
+      "acrPassword":{
+        "type": "string"
+      },
+      "mongoDBURI": {
+        "type": "string"
+      },
+      "kubernetesResourceGroupName": {
+        "type": "string"
+      },
+      "kubernetesClusterName": {
+        "type": "string"
+      },
+      "_artifactsLocation": {
+        "type": "string"
+      }
+    },
+    "variables": {
+      "nicName": "[concat(parameters('resourcePrefix'), '-nic')]",
+      "publicIPAddressName": "[concat(parameters('resourcePrefix'), '-ip')]",
+      "vmNameme": "[concat(parameters('resourcePrefix'), '')]",
+      "vmExtensionName": "[concat(parameters('resourcePrefix'), '-ini')]",
+      "frontEndNSGName": "[concat(parameters('resourcePrefix'), '-nsg')]",
+      "_extensionScript": "jenkins-acr-aks.sh",
+      "_artifactsLocationSasToken": ""
+    },
+    "resources": [
+      {
+        "apiVersion": "2016-09-01",
+        "type": "Microsoft.Network/publicIPAddresses",
+        "name": "[variables('publicIPAddressName')]",
+        "location": "[parameters('location')]",
+        "properties": {
+          "publicIPAllocationMethod": "Dynamic",
+          "dnsSettings": {
+            "domainNameLabel": "[parameters('dnsPrefix')]"
+          }
+        }
+      },
+      {
+        "apiVersion": "2015-06-15",
+        "type": "Microsoft.Network/networkSecurityGroups",
+        "name": "[variables('frontEndNSGName')]",
+        "location": "[parameters('location')]",
+        "properties": {
+          "securityRules": [
+            {
+              "name": "ssh-rule",
+              "properties": {
+                "description": "Allow SSH",
+                "protocol": "Tcp",
+                "sourcePortRange": "*",
+                "destinationPortRange": "22",
+                "sourceAddressPrefix": "Internet",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 100,
+                "direction": "Inbound"
+              }
+            },
+            {
+              "name": "http-rule",
+              "properties": {
+                "description": "Allow HTTP",
+                "protocol": "Tcp",
+                "sourcePortRange": "*",
+                "destinationPortRange": "80",
+                "sourceAddressPrefix": "Internet",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 101,
+                "direction": "Inbound"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "2016-09-01",
+        "type": "Microsoft.Network/networkInterfaces",
+        "name": "[variables('nicName')]",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+          "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+        ],
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "ipconfig1",
+              "properties": {
+                "privateIPAllocationMethod": "Dynamic",
+                "publicIPAddress": {
+                  "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+                },
+                "subnet": {
+                  "id": "[parameters('subnetId')]"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "2016-04-30-preview",
+        "type": "Microsoft.Compute/virtualMachines",
+        "name": "[variables('vmNameme')]",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+          "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]",
+          "[resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))]"
+        ],
+        "properties": {
+          "hardwareProfile": {
+            "vmSize": "Standard_DS1_v2"
+          },
+          "osProfile": {
+            "computerName": "[variables('vmNameme')]",
+            "adminUsername": "[parameters('linuxAdminUsername')]",
+            "linuxConfiguration": {
+              "disablePasswordAuthentication": "true",
+              "ssh": {
+                "publicKeys": [
+                  {
+                    "path": "[concat('/home/', parameters('linuxAdminUsername'), '/.ssh/authorized_keys')]",
+                    "keyData": "[parameters('linuxSSHPublicKey')]"
+                  }
+                ]
+              }
+            }
+          },
+          "storageProfile": {
+            "imageReference": {
+              "publisher": "Canonical",
+              "offer": "UbuntuServer",
+              "sku": "16.04-LTS",
+              "version": "latest"
+            },
+            "osDisk": {
+              "createOption": "fromImage",
+              "managedDisk": {
+                  "storageAccountType": "Premium_LRS"
+              }
+            }
+          },
+          "networkProfile": {
+            "networkInterfaces": [
+              {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+              }
+            ]
+          }
+        },
+        "resources": [
+          {
+            "type": "extensions",
+            "name": "[variables('vmExtensionName')]",
+            "apiVersion": "2015-06-15",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+              "[resourceId('Microsoft.Compute/virtualMachines', variables('vmNameme'))]"
+            ],
+            "properties": {
+              "publisher": "Microsoft.Azure.Extensions",
+              "type": "CustomScript",
+              "typeHandlerVersion": "2.0",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "fileUris": [
+                  "[concat(parameters('_artifactsLocation'), 'jenkins/', variables('_extensionScript'), variables('_artifactsLocationSasToken'))]"
+                ]
+              },
+              "protectedSettings": {
+                "commandToExecute": "[concat('./' , variables('_extensionScript'), ' -jf \"', reference(variables('publicIPAddressName')).dnsSettings.fqdn, '\" -u \"', parameters('linuxAdminUsername') , '\" -g \"', parameters('gitRepository') , '\" -r \"https://', parameters('acrServer'), '\" -ru \"', parameters('acrUsername'), '\" -rp \"', parameters('acrPassword'), '\" -subid \"', subscription().subscriptionId, '\" -tid \"', subscription().tenantId, '\" -spid \"', parameters('servicePrincipalClientId'), '\" -ss \"', parameters('servicePrincipalClientSecret'), '\" -gn \"', parameters('kubernetesResourceGroupName'),  '\" -cn \"', parameters('kubernetesClusterName'), '\" -mu \"', parameters('mongoDBURI'), '\" -al \"', parameters('_artifactsLocation'), '\" -st \"', variables('_artifactsLocationSasToken'), '\"' )]"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "outputs": {
+      "jenkinsURL": {
+        "type": "string",
+        "value": "[concat('http://', reference(variables('publicIPAddressName')).dnsSettings.fqdn)]"
+      },
+      "jenkinsSSH": {
+        "type": "string",
+        "value": "[concat('ssh -L 8080:localhost:8080 ', parameters('linuxAdminUsername'), '@', reference(variables('publicIPAddressName')).dnsSettings.fqdn)]"
+      }
+    }
+  }
