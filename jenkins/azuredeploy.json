@@ -15,8 +15,8 @@
       "linuxAdminUsername": {
         "type": "string"
       },
-      "linuxSSHPublicKey": {
-        "type": "string"
+      "linuxAdminPassword": {
+        "type": "securestring"
       },
       "dnsPrefix": {
         "type": "string"
@@ -150,17 +150,7 @@
           "osProfile": {
             "computerName": "[variables('vmNameme')]",
             "adminUsername": "[parameters('linuxAdminUsername')]",
-            "linuxConfiguration": {
-              "disablePasswordAuthentication": "true",
-              "ssh": {
-                "publicKeys": [
-                  {
-                    "path": "[concat('/home/', parameters('linuxAdminUsername'), '/.ssh/authorized_keys')]",
-                    "keyData": "[parameters('linuxSSHPublicKey')]"
-                  }
-                ]
-              }
-            }
+            "adminPassword": "[parameters('linuxAdminPassword')]"
           },
           "storageProfile": {
             "imageReference": {

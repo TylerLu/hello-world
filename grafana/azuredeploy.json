@@ -15,8 +15,8 @@
     "linuxAdminUsername": {
       "type": "string"
     },
-    "linuxSSHPublicKey": {
-      "type": "string"
+    "linuxAdminPassword": {
+      "type": "securestring"
     },
     "dnsPrefix": {
       "type": "string"
@@ -29,8 +29,8 @@
     }
   },
   "variables": {
-    "installOpts": "[concat('-A ', parameters('grafanaAdminPassword'))]",
-    "configureOpts": "-A \"Beat%40Apple123\" -p \"3000\" -S \"3b7912c3-ad06-426e-8627-41912372774b\" -T \"3dad2b09-9e66-4eb8-9bef-9f44544b0e74\" -i \"b3486972-fff3-4a67-bc97-b37a86bbe654\" -s \"3526bb0d-1d66-41bd-baa1-0301e0638aa2\"",
+    "installOpts": "[concat('-A ', parameters('linuxAdminPassword'))]",
+    "configureOpts": "[concat('-A \"', uriComponent(parameters('linuxAdminPassword')), '\" -p \"3000\" -S \"', subscription().subscriptionId, '\" -T \"', subscription().tenantId, '\" -i \"', parameters('servicePrincipalClientId'), '\" -s \"', parameters('servicePrincipalClientSecret'), '\")]",
     "nicName": "[concat(parameters('grafanaVMName'), '-nic')]",
     "publicIPAddressName": "[concat(parameters('grafanaVMName'), '-ip')]",
     "securityGroupName": "[concat(parameters('grafanaVMName'), '-nsg')]"
@@ -143,17 +143,7 @@
         "osProfile": {
           "computerName": "[concat(parameters('grafanaVMName'), '-vm')]",
           "adminUsername": "[parameters('linuxAdminUsername')]",
-          "linuxConfiguration": {
-            "disablePasswordAuthentication": "true",
-            "ssh": {
-              "publicKeys": [
-                {
-                  "path": "[concat('/home/', parameters('linuxAdminUsername'), '/.ssh/authorized_keys')]",
-                  "keyData": "[parameters('linuxSSHPublicKey')]"
-                }
-              ]
-            }
-          }
+          "adminPassword": "[parameters('linuxAdminPassword')]"
         },
         "networkProfile": {
           "networkInterfaces": [

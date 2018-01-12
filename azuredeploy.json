@@ -21,6 +21,12 @@
         },
         "defaultValue": "azureuser"
       },
+      "linuxAdminPassword": {
+        "type": "securestring",
+        "metadata": {
+          "description": "Password for the Jenkins and Grafana Virtual Machines."
+        }
+      },
       "linuxSSHPublicKey": {
         "type": "string",
         "metadata": {
@@ -235,8 +241,8 @@
             "linuxAdminUsername": {
               "value": "[parameters('linuxAdminUsername')]"
             },
-            "linuxSSHPublicKey": {
-              "value": "[parameters('linuxSSHPublicKey')]"
+            "linuxAdminPassword": {
+              "value": "[parameters('linuxAdminPassword')]"
             },
             "dnsPrefix": {
               "value": "[parameters('jenkinsDnsPrefix')]"
@@ -333,8 +339,8 @@
             "linuxAdminUsername": {
               "value": "[parameters('linuxAdminUsername')]"
             },
-            "linuxSSHPublicKey": {
-              "value": "[parameters('linuxSSHPublicKey')]"
+            "linuxAdminPassword": {
+              "value": "[parameters('linuxAdminPassword')]"
             },
             "dnsPrefix": {
               "value": "[parameters('jenkinsDnsPrefix')]"
