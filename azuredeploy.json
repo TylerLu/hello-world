@@ -277,6 +277,40 @@
         ]
       },
       {
+        "apiVersion": "2017-08-31",
+        "type": "Microsoft.ContainerService/managedClusters",
+        "location": "[resourceGroup().location]",
+        "name": "[parameters('kubernetesClusterName')]",
+        "properties": {
+          "kubernetesVersion": "[parameters('kubernetesVersion')]",
+          "dnsPrefix": "[parameters('kubernetesDnsPrefix')]",
+          "agentPoolProfiles": [
+            {
+              "name": "agentpool",
+              "osDiskSizeGB": 0,
+              "count": "[parameters('kubernetesAgentCount')]",
+              "vmSize": "[parameters('kubernetesAgentVMSize')]",
+              "osType": "Linux",
+              "storageProfile": "ManagedDisks"
+            }
+          ],
+          "linuxProfile": {
+              "adminUsername": "[parameters('linuxAdminUsername')]",
+              "ssh": {
+                "publicKeys": [
+                  {
+                    "keyData": "[parameters('linuxSSHPublicKey')]"
+                  }
+                ]
+              }
+            },
+            "servicePrincipalProfile": {
+                "ClientId": "[parameters('servicePrincipalClientId')]",
+                "Secret": "[parameters('servicePrincipalClientSecret')]"
+          }
+        }
+      },
+      {
         "apiVersion": "2017-05-10",
         "name": "grafanaDeployment",
         "type": "Microsoft.Resources/deployments",
@@ -313,45 +347,10 @@
             }
           }
         },
-        "dependsOn": [          
-          "[resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))]",
-          "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-          "[resourceId('Microsoft.DocumentDb/databaseAccounts', variables('comsosDbName'))]"
+        "dependsOn": [
+          "[resourceId('Microsoft.DocumentDb/databaseAccounts', variables('comsosDbName'))]",
+          "[resourceId('Microsoft.ContainerService/managedClusters', parameters('kubernetesClusterName'))]"
         ]
-      },
-      {
-        "apiVersion": "2017-08-31",
-        "type": "Microsoft.ContainerService/managedClusters",
-        "location": "[resourceGroup().location]",
-        "name": "[parameters('kubernetesClusterName')]",
-        "properties": {
-          "kubernetesVersion": "[parameters('kubernetesVersion')]",
-          "dnsPrefix": "[parameters('kubernetesDnsPrefix')]",
-          "agentPoolProfiles": [
-            {
-              "name": "agentpool",
-              "osDiskSizeGB": 0,
-              "count": "[parameters('kubernetesAgentCount')]",
-              "vmSize": "[parameters('kubernetesAgentVMSize')]",
-              "osType": "Linux",
-              "storageProfile": "ManagedDisks"
-            }
-          ],
-          "linuxProfile": {
-              "adminUsername": "[parameters('linuxAdminUsername')]",
-              "ssh": {
-                "publicKeys": [
-                  {
-                    "keyData": "[parameters('linuxSSHPublicKey')]"
-                  }
-                ]
-              }
-            },
-            "servicePrincipalProfile": {
-                "ClientId": "[parameters('servicePrincipalClientId')]",
-                "Secret": "[parameters('servicePrincipalClientSecret')]"
-          }
-        }
       }
     ],
     "outputs": {
