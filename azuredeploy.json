@@ -150,12 +150,10 @@
     },
     "variables": {
       "jenkinsResourcePrefix": "jenkins",
-      "acrName": "[uniqueString(resourceGroup().id)]",
       "comsosDbName": "[uniqueString(resourceGroup().id)]",
-      "virtualNetworkName": "[concat(variables('resourcePrefix'), 'VNET')]",
-      "subnetName": "[concat(variables('resourcePrefix'), 'Subnet')]",
-      "_extensionScript": "jenkins-acr-aks.sh",
-      "_artifactsLocationSasToken": ""
+      "acrName": "[uniqueString(resourceGroup().id)]",
+      "virtualNetworkName": "virtual-networt",
+      "subnetName": "default-subnet"
     },
     "resources": [
       {
@@ -213,11 +211,11 @@
           },
           "parameters": {
             "location": "[resourceGroup().location]",
-            "resourcePrefix": "[variables('jenkinsResourcePrefix')]]",
+            "resourcePrefix": "[variables('jenkinsResourcePrefix')]",
             "linuxAdminUsername": "[parameters('linuxAdminUsername')]",
             "linuxSSHPublicKey": "[parameters('linuxSSHPublicKey')]",
             "dnsPrefix": "[parameters('jenkinsDnsPrefix')]",
-            "subnetId": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName')), '/subnets/', parameters('subnetName'))]]",
+            "subnetId": "[concat(resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName')), '/subnets/', variables('subnetName'))]",
             "gitRepository": "[parameters('gitRepository')]",
             "acrServer": "[reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))).loginServer]",
             "acrUsername": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-10-01').username]",
