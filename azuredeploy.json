@@ -210,7 +210,6 @@
             "contentVersion": "1.0.0.0"
           },
           "parameters": {
-            "location": "[resourceGroup().location]",
             "resourcePrefix": "[variables('jenkinsResourcePrefix')]",
             "linuxAdminUsername": "[parameters('linuxAdminUsername')]",
             "linuxSSHPublicKey": "[parameters('linuxSSHPublicKey')]",
