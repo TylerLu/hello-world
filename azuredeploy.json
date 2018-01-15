@@ -391,22 +391,6 @@
       "grafanaUrl": {
         "type": "string",
         "value": "[reference('grafanaDeployment').outputs.grafanaURL.value]"
-      },
-      "testURL1": {
-        "type": "string",
-        "value": "[uri(deployment().properties.templateLink.uri, 'helloworld.json')]"
-      },
-      "testURL2": {
-          "type": "string",
-          "value": "[uri(deployment().properties.templateLink.uri, '')]"
-      },
-      "testURL3": {
-          "type": "string",
-          "value": "[uri(deployment().properties.templateLink.uri, '/')]"
-      },
-      "testURL4": {
-          "type": "string",
-          "value": "[substring(deployment().properties.templateLink.uri, 0, add(lastIndexOf(deployment().properties.templateLink.uri, '/'), 1))]"
       }
     }
   }
