@@ -128,18 +128,18 @@ dashboard_db=$(curl -s ${ARTIFACTS_LOCATION}/grafana/dashboard-db.json)
 dashboard_db=${dashboard_db//'{RESOURCE-GROUP-PLACEHOLDER}'/${RESOURCE_GROUP}}
 dashboard_db=${dashboard_db//'{COSMOSDB-NAME-PLACEHOLDER}'/${COMSOSDB_NAME}}
 
-panels=""
-dashboard_aks_panel=$(curl -s ${ARTIFACTS_LOCATION}/grafana/dashboard-aks-panel.json)
+targets=""
+dashboard_aks_target=$(curl -s ${ARTIFACTS_LOCATION}/grafana/dashboard-aks-target.json)
 for virtual_machine in $virtual_machines
 do
-  panel=${dashboard_aks_panel//'{RESOURCE-GROUP-PLACEHOLDER}'/${aks_resource_group}}
-  panel=${panel//'{VM-NAME-PLACEHOLDER}'/${virtual_machine}}
-  panels=${panels},${panel}
+  target=${dashboard_aks_target//'{RESOURCE-GROUP-PLACEHOLDER}'/${aks_resource_group}}
+  target=${target//'{VM-NAME-PLACEHOLDER}'/${virtual_machine}}
+  targets=${targets},${target}
 done
-panels=${panels:1:${#panels}}
+targets=${targets:1:${#targets}}
 
 dashboard_aks=$(curl -s ${ARTIFACTS_LOCATION}/grafana/dashboard-aks.json)
-dashboard_aks=${dashboard_aks//'"panels": []'/"\"panels\"": [${panels}]}
+dashboard_aks=${dashboard_aks//'"targets": []'/"\"targets\"": [${targets}]}
 
 dashboard=$(curl -s ${ARTIFACTS_LOCATION}/grafana/dashboard.json)
 dashboard=${dashboard//'"rows": []'/"\"rows\"": [${dashboard_db}, ${dashboard_aks}]}
