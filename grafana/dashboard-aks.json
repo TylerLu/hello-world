@@ -42,14 +42,14 @@
             "azureMonitor": {
               "aggOptions": [ "None", "Average", "Minimum", "Maximum", "Total", "Count" ],
               "aggregation": "Average",
-              "alias": "Agent 0",
+              "alias": "{VM-ALIAS-PLACEHOLDER}",
               "dimension": "",
               "dimensionFilter": "*",
               "dimensions": [],
               "metricDefinition": "Microsoft.Compute/virtualMachines",
               "metricName": "Percentage CPU",
-              "resourceGroup": "MC_MSAzure-Tyler-Test-40_tyler-k40_eastus",
-              "resourceName": "aks-agentpool-36263208-0",
+              "resourceGroup": "{RESOURCE-GROUP-PLACEHOLDER}",
+              "resourceName": "{VM-NAME-PLACEHOLDER}",
               "timeGrain": "1",
               "timeGrainUnit": "minute"
             },

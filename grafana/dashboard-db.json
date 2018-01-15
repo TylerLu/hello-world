@@ -73,8 +73,8 @@
               ],
               "metricDefinition": "Microsoft.DocumentDb/databaseAccounts",
               "metricName": "TotalRequests",
-              "resourceGroup": "MSAzure-Tyler-Test-40",
-              "resourceName": "comsos-tyler-40",
+              "resourceGroup": "{RESOURCE-GROUP-PLACEHOLDER}",
+              "resourceName": "{COSMOSDB-NAME-PLACEHOLDER}",
               "timeGrain": "1",
               "timeGrainUnit": "minute"
             },
