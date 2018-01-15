@@ -397,6 +397,10 @@
       "testURL3": {
           "type": "string",
           "value": "[uri(deployment().properties.templateLink.uri, '/')]"
+      },
+      "testURL4": {
+          "type": "string",
+          "value": "[substring(deployment().properties.templateLink.uri, 0, add(lastIndexOf(deployment().properties.templateLink.uri, '/'), 1))]"
       }
     }
   }
