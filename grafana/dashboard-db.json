@@ -8,7 +8,7 @@
         "bars": false,
         "dashLength": 10,
         "dashes": false,
-        "datasource": null,
+        "datasource": "Azure Monitor",
         "fill": 1,
         "legend": {
           "avg": false,
