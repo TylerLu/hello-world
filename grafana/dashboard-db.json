@@ -42,7 +42,7 @@
             "azureMonitor": {
               "aggOptions": [ "None", "Average", "Minimum", "Maximum", "Total", "Count" ],
               "aggregation": "Count",
-              "alias": "ComsosDB",
+              "alias": "CosmosDB",
               "dimension": "None",
               "dimensionFilter": "*",
               "dimensions": [

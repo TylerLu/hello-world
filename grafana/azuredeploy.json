@@ -24,13 +24,16 @@
     "subnetId": {
       "type": "string"
     },
+    "cosmosDbName": {
+      "type": "string"
+    },
     "_artifactsLocation": {
       "type": "string"
     }
   },
   "variables": {
     "installOpts": "[concat('-A ', parameters('linuxAdminPassword'))]",
-    "configureOpts": "[concat('-A \"', uriComponent(parameters('linuxAdminPassword')), '\" -p \"80\" -S \"', subscription().subscriptionId, '\" -T \"', subscription().tenantId, '\" -i \"', parameters('servicePrincipalClientId'), '\" -s \"', parameters('servicePrincipalClientSecret'), '\"')]",
+    "configureOpts": "[concat('-A \"', uriComponent(parameters('linuxAdminPassword')), '\" -p \"80\" -S \"', subscription().subscriptionId, '\" -T \"', subscription().tenantId, '\" -i \"', parameters('servicePrincipalClientId'), '\" -s \"', parameters('servicePrincipalClientSecret'), '\" -r \"', resourceGroup().name, '\" -c \"', parameters('cosmosDbName'), '\" -l \"', parameters('_artifactsLocation'), '\"')]",
     "nicName": "[concat(parameters('grafanaVMName'), '-nic')]",
     "publicIPAddressName": "[concat(parameters('grafanaVMName'), '-ip')]",
     "securityGroupName": "[concat(parameters('grafanaVMName'), '-nsg')]"

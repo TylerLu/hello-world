@@ -33,10 +33,10 @@
           "description": "Configure all linux machines with the SSH RSA public key string. Your key should include three parts, for example 'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm'"
         }
       },
-      "comsosDbName": {
+      "cosmosDbName": {
         "type": "string",
         "metadata": {
-          "description": "Name of the ComsosDB."
+          "description": "Name of the CosmosDB."
         }
       },
       "acrName": {
@@ -175,7 +175,7 @@
     "variables": {
       "jenkinsVMName": "jenkins",
       "grafanaVMName": "grafana",
-      "comsosDbName": "[parameters('comsosDbName')]",
+      "cosmosDbName": "[parameters('cosmosDbName')]",
       "acrName": "[parameters('acrName')]",
       "virtualNetworkName": "virtual-network",
       "subnetName": "default-subnet"
@@ -197,7 +197,7 @@
         "apiVersion": "2015-04-08",
         "kind": "MongoDB",
         "type": "Microsoft.DocumentDb/databaseAccounts",
-        "name": "[variables('comsosDbName')]",
+        "name": "[variables('cosmosDbName')]",
         "location": "[resourceGroup().location]",
         "properties": {
             "databaseAccountOfferType": "Standard"
@@ -269,7 +269,7 @@
               "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2017-10-01').passwords[0].value]"
             },
             "mongoDbURI": {
-              "value": "[concat('mongodb://', variables('comsosDbName'), ':', uriComponent(listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts', variables('comsosDbName')), '2015-04-08').primaryMasterKey), '@', variables('comsosDbName'), '.documents.azure.com:10255/?ssl=true&replicaSet=globaldb')]"
+              "value": "[concat('mongodb://', variables('cosmosDbName'), ':', uriComponent(listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts', variables('cosmosDbName')), '2015-04-08').primaryMasterKey), '@', variables('cosmosDbName'), '.documents.azure.com:10255/?ssl=true&replicaSet=globaldb')]"
             },
             "kubernetesResourceGroupName": {
               "value": "[resourceGroup().name]"
@@ -285,7 +285,7 @@
         "dependsOn": [          
           "[resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))]",
           "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-          "[resourceId('Microsoft.DocumentDb/databaseAccounts', variables('comsosDbName'))]"
+          "[resourceId('Microsoft.DocumentDb/databaseAccounts', variables('cosmosDbName'))]"
         ]
       },
       {
@@ -354,13 +354,16 @@
             "subnetId": {
               "value": "[concat(resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName')), '/subnets/', variables('subnetName'))]"
             },
+            "cosmosDbName": {
+              "value": "[parameters('cosmosDbName')]"
+            },
             "_artifactsLocation": {
               "value": "[parameters('_artifactsLocation')]"
             }
           }
         },
         "dependsOn": [
-          "[resourceId('Microsoft.DocumentDb/databaseAccounts', variables('comsosDbName'))]",
+          "[resourceId('Microsoft.DocumentDb/databaseAccounts', variables('cosmosDbName'))]",
           "[resourceId('Microsoft.ContainerService/managedClusters', parameters('kubernetesClusterName'))]"
         ]
       }

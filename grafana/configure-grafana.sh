@@ -14,11 +14,11 @@ help()
     echo "-T Azure tenant id"
     echo "-i Azure service principal client id"
     echo "-s Azure service principal client secret"
+    echo "-r Name of the resource group"
+    echo "-c Name of the CosmosDB"    
+    echo "-l Artifacts location"
     echo "-h view this help content"
 }
-
-# Parameters
-ADMIN_PWD="admin"
 
 #Loop through options passed
 while getopts A:p:S:T:i:s::h optname; do
@@ -41,6 +41,15 @@ while getopts A:p:S:T:i:s::h optname; do
       ;;    
     s)
       CLIENT_SECRET="${OPTARG}"
+      ;;
+    r)
+      RESOURCE_GROUP="${OPTARG}"
+      ;;   
+    c)
+      COMSOSDB_NAME="${OPTARG}"
+      ;;   
+    l)
+      ARTIFACTS_LOCATION="${OPTARG}"
       ;;
     h) #show help
       help
@@ -69,7 +78,7 @@ function retry_until_successful {
 }
 
 function post_json() {
-   curl -X POST http://admin:$ADMIN_PWD@localhost:$GRAFANA_PORT$1 \
+  curl -X POST http://admin:$ADMIN_PWD@localhost:$GRAFANA_PORT$1 \
      -H "Content-Type: application/json" \
      -d "$2"
 }
@@ -96,3 +105,15 @@ post_json "/api/datasources" "$(cat <<EOF
 }
 EOF
 )"
+
+#create dashboard
+dashboard_db=$(curl -s ${ARTIFACTS_LOCATION}/grafana/dashboard-db.json)
+dashboard_db=${dashboard_db//'{RESOURCE-GROUP-PLACEHOLDER}'/${RESOURCE_GROUP}}
+dashboard_db=${dashboard_db//'{COSMOSDB-NAME-PLACEHOLDER}'/${COMSOSDB_NAME}}
+
+#dashboard_aks=$(curl -s ${ARTIFACTS_LOCATION}/grafana/dashboard-aks.json)
+
+dashboard=$(curl -s ${ARTIFACTS_LOCATION}/grafana/dashboard.json)
+dashboard=${dashboard//'"rows": []'/"rows": [${dashboard_aks}]}
+
+post_json "/api/dashboards/db" "${dashboard}"
