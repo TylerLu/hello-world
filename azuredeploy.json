@@ -382,6 +382,10 @@
         "type": "string",
         "value": "[reference(concat('Microsoft.ContainerService/managedClusters/', parameters('kubernetesClusterName'))).fqdn]"
       },
+      "grafanaUrl": {
+        "type": "string",
+        "value": "[reference('grafanaDeployment').outputs.grafanaURL.value]"
+      },
       "testURL1": {
         "type": "string",
         "value": "[uri(deployment().properties.templateLink.uri, 'helloworld.json')]"
