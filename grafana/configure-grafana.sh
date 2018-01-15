@@ -21,7 +21,7 @@ help()
 }
 
 #Loop through options passed
-while getopts A:p:S:T:i:s::h optname; do
+while getopts A:p:S:T:i:s:r:c:l::h optname; do
   log "Option $optname set"
   case $optname in
     A)
