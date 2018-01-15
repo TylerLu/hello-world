@@ -15,13 +15,14 @@ help()
     echo "-i Azure service principal client id"
     echo "-s Azure service principal client secret"
     echo "-r Name of the resource group"
-    echo "-c Name of the CosmosDB"    
+    echo "-c Name of the CosmosDB"
+    echo "-k Name of the Kubernetes cluster"
     echo "-l Artifacts location"
     echo "-h view this help content"
 }
 
 #Loop through options passed
-while getopts A:p:S:T:i:s:r:c:l::h optname; do
+while getopts A:p:S:T:i:s:r:c:k:l::h optname; do
   log "Option $optname set"
   case $optname in
     A)
@@ -47,7 +48,10 @@ while getopts A:p:S:T:i:s:r:c:l::h optname; do
       ;;   
     c)
       COMSOSDB_NAME="${OPTARG}"
-      ;;   
+      ;;
+    k)
+      CLUSTER_NAME="${OPTARG}"
+      ;;
     l)
       ARTIFACTS_LOCATION="${OPTARG}"
       ;;
@@ -83,6 +87,15 @@ function post_json() {
      -d "$2"
 }
 
+#install azure-cli
+sudo apt-get install azure-cli --yes
+
+#get vitrual machines
+az login --service-principal -u $CLIENT_ID --password $CLIENT_SECRET --tenant $TENANT_ID
+location=$(az group show --name $RESOURCE_GROUP --query location --out tsv)
+aks_resource_group="MC_${RESOURCE_GROUP}_${CLUSTER_NAME}_${location}"
+virtual_machines=$(az resource list --resource-group ${aks_resource_group} --resource-type Microsoft.Compute/virtualMachines --query [*].name --out tsv)
+
 #wait until Grafana gets started
 retry_until_successful curl http://localhost:$GRAFANA_PORT
 
@@ -111,9 +124,20 @@ dashboard_db=$(curl -s ${ARTIFACTS_LOCATION}/grafana/dashboard-db.json)
 dashboard_db=${dashboard_db//'{RESOURCE-GROUP-PLACEHOLDER}'/${RESOURCE_GROUP}}
 dashboard_db=${dashboard_db//'{COSMOSDB-NAME-PLACEHOLDER}'/${COMSOSDB_NAME}}
 
-#dashboard_aks=$(curl -s ${ARTIFACTS_LOCATION}/grafana/dashboard-aks.json)
+panels=""
+dashboard_aks_panel=$(curl -s ${ARTIFACTS_LOCATION}/grafana/dashboard-aks-panel.json)
+for virtual_machine in $virtual_machines
+do
+  panel=${dashboard_aks_panel//'{RESOURCE-GROUP-PLACEHOLDER}'/${aks_resource_group}}
+  panel=${panel//'{VM-NAME-PLACEHOLDER}'/${virtual_machine}}
+  panels=${panels},${panel}
+done
+panels=${panels:1:${#panels}}
+
+dashboard_aks=$(curl -s ${ARTIFACTS_LOCATION}/grafana/dashboard-aks.json)
+dashboard_aks=${dashboard_aks//'"panels": []'/"\"panels\"": [${panels}]}
 
 dashboard=$(curl -s ${ARTIFACTS_LOCATION}/grafana/dashboard.json)
-dashboard=${dashboard//'"rows": []'/"rows": [${dashboard_aks}]}
+dashboard=${dashboard//'"rows": []'/"\"rows\"": [${dashboard_db}, ${dashboard_aks}]}
 
 post_json "/api/dashboards/db" "${dashboard}"
