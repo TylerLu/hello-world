@@ -162,14 +162,14 @@
         "metadata": {
           "description": "URL to a public git repository that includes a Dockerfile."
         },
-        "defaultValue": "https://github.com/<YOUR-REPOSITORY>/hello-world"
+        "defaultValue": "https://github.com/TylerLu/hello-world"
       },
       "_artifactsLocation": {
         "type": "string",
         "metadata": {
           "description": "URL to a folder that includes artifacts."
         },
-        "defaultValue": "https://raw.githubusercontent.com/<YOUR-REPOSITORY>/hello-world/master/"
+        "defaultValue": "https://raw.githubusercontent.com/TylerLu/hello-world/master/"
       }
     },
     "variables": {
