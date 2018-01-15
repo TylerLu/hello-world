@@ -35,8 +35,8 @@
     }
   },
   "variables": {
-    "installOpts": "[concat('-A \"', parameters('linuxAdminPassword'), '\" -p \"80\"')]",
-    "configureOpts": "[concat('-A \"', uriComponent(parameters('linuxAdminPassword')), '\" -p \"80\" -S \"', subscription().subscriptionId, '\" -T \"', subscription().tenantId, '\" -i \"', parameters('servicePrincipalClientId'), '\" -s \"', parameters('servicePrincipalClientSecret'), '\" -r \"', resourceGroup().name, '\" -c \"', parameters('cosmosDbName'), '\" -k \"', parameters('kubernetesClusterName'), '\" -l \"', parameters('_artifactsLocation'), '\"')]",
+    "installOpts": "[concat('-A \"', parameters('linuxAdminPassword'), '\"')]",
+    "configureOpts": "[concat('-A \"', uriComponent(parameters('linuxAdminPassword')), '\" -p \"3000\" -S \"', subscription().subscriptionId, '\" -T \"', subscription().tenantId, '\" -i \"', parameters('servicePrincipalClientId'), '\" -s \"', parameters('servicePrincipalClientSecret'), '\" -r \"', resourceGroup().name, '\" -c \"', parameters('cosmosDbName'), '\" -k \"', parameters('kubernetesClusterName'), '\" -l \"', parameters('_artifactsLocation'), '\"')]",
     "nicName": "[concat(parameters('grafanaVMName'), '-nic')]",
     "publicIPAddressName": "[concat(parameters('grafanaVMName'), '-ip')]",
     "securityGroupName": "[concat(parameters('grafanaVMName'), '-nsg')]"
@@ -190,7 +190,7 @@
   "outputs": {
     "grafanaURL": {
       "type": "string",
-      "value": "[concat('http://', reference(variables('publicIPAddressName')).dnsSettings.fqdn)]"
+      "value": "[concat('http://', reference(variables('publicIPAddressName')).dnsSettings.fqdn, ':3000')]"
     }
   }
 }
