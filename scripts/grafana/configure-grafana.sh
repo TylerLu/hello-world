@@ -18,11 +18,12 @@ help()
     echo "-c Name of the CosmosDB"
     echo "-k Name of the Kubernetes cluster"
     echo "-l Artifacts location"
+    echo "-t Artifacts location sas token"
     echo "-h view this help content"
 }
 
 #Loop through options passed
-while getopts A:p:S:T:i:s:r:c:k:l::h optname; do
+while getopts A:p:S:T:i:s:r:c:k:l:t::h optname; do
   log "Option $optname set"
   case $optname in
     A)
@@ -54,6 +55,9 @@ while getopts A:p:S:T:i:s:r:c:k:l::h optname; do
       ;;
     l)
       ARTIFACTS_LOCATION="${OPTARG}"
+      ;;
+    t)
+      ARTIFACTS_LOCATION_SAS_TOKEN="${OPTARG}"
       ;;
     h) #show help
       help
@@ -124,12 +128,12 @@ EOF
 )"
 
 #create dashboard
-dashboard_db=$(curl -s ${ARTIFACTS_LOCATION}/grafana/dashboard-db.json)
+dashboard_db=$(curl -s ${ARTIFACTS_LOCATION}/scripts/grafana/dashboard-db.json${ARTIFACTS_LOCATION_SAS_TOKEN})
 dashboard_db=${dashboard_db//'{RESOURCE-GROUP-PLACEHOLDER}'/${RESOURCE_GROUP}}
 dashboard_db=${dashboard_db//'{COSMOSDB-NAME-PLACEHOLDER}'/${COMSOSDB_NAME}}
 
 targets=""
-dashboard_aks_target=$(curl -s ${ARTIFACTS_LOCATION}/grafana/dashboard-aks-target.json)
+dashboard_aks_target=$(curl -s ${ARTIFACTS_LOCATION}/scripts/grafana/dashboard-aks-target.json${ARTIFACTS_LOCATION_SAS_TOKEN})
 for virtual_machine in $virtual_machines
 do
   target=${dashboard_aks_target//'{RESOURCE-GROUP-PLACEHOLDER}'/${aks_resource_group}}
@@ -138,10 +142,10 @@ do
 done
 targets=${targets:1:${#targets}}
 
-dashboard_aks=$(curl -s ${ARTIFACTS_LOCATION}/grafana/dashboard-aks.json)
+dashboard_aks=$(curl -s ${ARTIFACTS_LOCATION}/scripts/grafana/dashboard-aks.json${ARTIFACTS_LOCATION_SAS_TOKEN})
 dashboard_aks=${dashboard_aks//'"targets": []'/"\"targets\"": [${targets}]}
 
-dashboard=$(curl -s ${ARTIFACTS_LOCATION}/grafana/dashboard.json)
+dashboard=$(curl -s ${ARTIFACTS_LOCATION}/scripts/grafana/dashboard.json${ARTIFACTS_LOCATION_SAS_TOKEN})
 dashboard=${dashboard//'"rows": []'/"\"rows\"": [${dashboard_db}, ${dashboard_aks}]}
 
 post_json "/api/dashboards/db" "${dashboard}"

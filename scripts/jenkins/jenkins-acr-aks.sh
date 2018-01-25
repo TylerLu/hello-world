@@ -1,7 +1,6 @@
 #!/bin/bash
 function print_usage() {
   cat <<EOF
-https://github.com/Azure/azure-quickstart-templates/tree/master/201-jenkins-acr
 Command
   $0
 Arguments
@@ -46,7 +45,6 @@ function run_util_script() {
 }
 
 #defaults
-artifacts_location="https://raw.githubusercontent.com/Azure/azure-devops-utils/master/"
 while [[ $# > 0 ]]
 do
   key="$1"
@@ -141,7 +139,7 @@ throw_if_empty --cluster_name $cluster_name
 throw_if_empty --cluster_name $mongodb_uri
 
 #install jenkins
-run_util_script "jenkins/install_jenkins.sh" -jf "${jenkins_fqdn}" -spid "${service_principal_id}" -ss "${service_principal_secret}" -subid "${subscription_id}" -tid "${tenant_id}" -al "${artifacts_location}" -st "${artifacts_location_sas_token}"
+run_util_script "scripts/jenkins/install_jenkins.sh" -jf "${jenkins_fqdn}" -spid "${service_principal_id}" -ss "${service_principal_secret}" -subid "${subscription_id}" -tid "${tenant_id}" -al "${artifacts_location}" -st "${artifacts_location_sas_token}"
 
 #install git
 sudo apt-get install git --yes
@@ -165,4 +163,4 @@ job_display_name="Hello World Build & Deploy"
 job_description="A pipeline that builds a Docker image, pushed built image to ACR, and deploy configurations to AKS."
 
 echo "Including the pipeline"
-run_util_script "jenkins/add-docker-build-job.sh" -j "http://localhost:8080/" -ju "admin" -jsn "${job_short_name}" -jdn "${job_display_name}" -jd "${job_description}" -g "${git_url}" -r "${registry}" -ru "${registry_user_name}" -rp "${registry_password}" -rr "$repository" -agn "${resource_group_name}" -acn "${cluster_name}" -mu "${mongodb_uri}" -sps "* * * * *" -al "$artifacts_location" -st "$artifacts_location_sas_token"
+run_util_script "scripts/jenkins/add-docker-build-job.sh" -j "http://localhost:8080/" -ju "admin" -jsn "${job_short_name}" -jdn "${job_display_name}" -jd "${job_description}" -g "${git_url}" -r "${registry}" -ru "${registry_user_name}" -rp "${registry_password}" -rr "$repository" -agn "${resource_group_name}" -acn "${cluster_name}" -mu "${mongodb_uri}" -sps "* * * * *" -al "$artifacts_location" -st "$artifacts_location_sas_token"

@@ -58,7 +58,6 @@ job_description="A basic pipeline that builds a Docker container. The job expect
 repository="${USER}/myfirstapp"
 scm_poll_schedule=""
 scm_poll_ignore_commit_hooks="0"
-artifacts_location="https://raw.githubusercontent.com/Azure/azure-devops-utils/master/"
 
 while [[ $# > 0 ]]
 do
@@ -169,8 +168,8 @@ throw_if_empty --aks_cluster_name $aks_cluster_name
 throw_if_empty --aks_cluster_name $mongodb_uri
 
 #download dependencies
-job_xml=$(curl -s ${artifacts_location}/jenkins/basic-docker-build-job.xml${artifacts_location_sas_token})
-credentials_xml=$(curl -s ${artifacts_location}/jenkins/basic-user-pwd-credentials.xml${artifacts_location_sas_token})
+job_xml=$(curl -s ${artifacts_location}/scripts/jenkins/basic-docker-build-job.xml${artifacts_location_sas_token})
+credentials_xml=$(curl -s ${artifacts_location}/scripts/jenkins/basic-user-pwd-credentials.xml${artifacts_location_sas_token})
 
 #escape xml reserved characters
 escapsed_credentials_id=$(xmlstarlet esc "$credentials_id")
@@ -225,26 +224,26 @@ EOF
   job_xml=${job_xml//'<triggers/>'/${triggers_xml_node}}
 fi
 
-job_xml=${job_xml//'{insert-groovy-script}'/"$(curl -s ${artifacts_location}/jenkins/basic-docker-build.groovy${artifacts_location_sas_token})"}
+job_xml=${job_xml//'{insert-groovy-script}'/"$(curl -s ${artifacts_location}/scripts/jenkins/basic-docker-build.groovy${artifacts_location_sas_token})"}
 echo "${job_xml}" > job.xml
 
 #install the required plugins
-run_util_script "jenkins/run-cli-command.sh" -j "$jenkins_url" -ju "$jenkins_username" -jp "$jenkins_password" -c "install-plugin credentials -deploy"
+run_util_script "scripts/jenkins/run-cli-command.sh" -j "$jenkins_url" -ju "$jenkins_username" -jp "$jenkins_password" -c "install-plugin credentials -deploy"
 plugins=(docker-workflow git)
 for plugin in "${plugins[@]}"; do
-  run_util_script "jenkins/run-cli-command.sh" -j "$jenkins_url" -ju "$jenkins_username" -jp "$jenkins_password" -c "install-plugin $plugin -restart"
+  run_util_script "scripts/jenkins/run-cli-command.sh" -j "$jenkins_url" -ju "$jenkins_username" -jp "$jenkins_password" -c "install-plugin $plugin -restart"
 done
 
 #wait for instance to be back online
-run_util_script "jenkins/run-cli-command.sh" -j "$jenkins_url" -ju "$jenkins_username" -jp "$jenkins_password" -c "version"
+run_util_script "scripts/jenkins/run-cli-command.sh" -j "$jenkins_url" -ju "$jenkins_username" -jp "$jenkins_password" -c "version"
 
 echo "${credentials_xml}" > credentials.xml
 
 #add user/pwd
-run_util_script "jenkins/run-cli-command.sh" -j "$jenkins_url" -ju "$jenkins_username" -jp "$jenkins_password" -c 'create-credentials-by-xml SystemCredentialsProvider::SystemContextResolver::jenkins (global)' -cif "credentials.xml"
+run_util_script "scripts/jenkins/run-cli-command.sh" -j "$jenkins_url" -ju "$jenkins_username" -jp "$jenkins_password" -c 'create-credentials-by-xml SystemCredentialsProvider::SystemContextResolver::jenkins (global)' -cif "credentials.xml"
 
 #add job
-run_util_script "jenkins/run-cli-command.sh" -j "$jenkins_url" -ju "$jenkins_username" -jp "$jenkins_password" -c "create-job ${job_short_name}" -cif "job.xml"
+run_util_script "scripts/jenkins/run-cli-command.sh" -j "$jenkins_url" -ju "$jenkins_username" -jp "$jenkins_password" -c "create-job ${job_short_name}" -cif "job.xml"
 
 #cleanup
 rm credentials.xml
