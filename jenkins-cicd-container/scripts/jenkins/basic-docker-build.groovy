@@ -5,7 +5,7 @@ node {
       git branch: 'master', url: params.GIT_REPO
     }
     stage('Build Docker image') {
-      built_img = docker.build(params.DOCKER_REPOSITORY + ":${env.BUILD_NUMBER}", '.')
+      built_img = docker.build(params.DOCKER_REPOSITORY + ":${env.BUILD_NUMBER}", './jenkins-cicd-container')
     }
     stage('Push Docker image to Azure Container Registry') {
       docker.withRegistry(params.REGISTRY_URL, params.REGISTRY_CREDENTIALS_ID ) {
